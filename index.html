@@ -745,7 +745,7 @@
     // Supabase Auth + Row Level Security
     const SUPABASE_URL = "https://aysfzfhixtzuwehvszyo.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_QgBz80voMVhkFcx-VmBjEw_o2OMNkto";
-    const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentAccount = null;
     const DEFAULT_SUBCATS = {'수입':['월급여(소득)','부수입'],'지출':['고정비','생활비','여가비','비상금'],'저축':['예금/적금','저금']};
     let state = {
@@ -770,9 +770,9 @@
     }
     async function loadAccountData(id) {
       try {
-        const {data:userData,error:userError}=await sbClient.auth.getUser();
+        const {data:userData,error:userError}=await window.sbClient.auth.getUser();
         if(userError || !userData.user) throw userError || new Error('로그인이 필요합니다.');
-        const {data,error}=await sbClient.from('gagyeboo_data').select('data').eq('user_id',userData.user.id).maybeSingle();
+        const {data,error}=await window.sbClient.from('gagyeboo_data').select('data').eq('user_id',userData.user.id).maybeSingle();
         if(error) throw error;
         const saved=data?.data || {};
         state.members=saved.members || [];
@@ -796,7 +796,7 @@
       if(id.length<2 || id.length>40){alert('아이디는 2~40자로 입력해주세요.');return;}
       if(pw.length<8){alert('비밀번호는 8자 이상으로 설정해주세요.');return;}
       try {
-        const {data,error}=await sbClient.auth.signUp({email:accountEmail(id),password:pw,options:{data:{username:id}}});
+        const {data,error}=await window.sbClient.auth.signUp({email:accountEmail(id),password:pw,options:{data:{username:id}}});
         if(error) throw error;
         if(!data.session){alert('가입은 완료됐지만 세션이 없습니다. Supabase의 Confirm email 설정을 확인해주세요.');return;}
         currentAccount=id; localStorage.setItem('gagyeboo_account_name',id);
@@ -807,7 +807,7 @@
       e.preventDefault();
       const id=document.getElementById('loginId').value.trim(), pw=document.getElementById('loginPw').value;
       try {
-        const {error}=await sbClient.auth.signInWithPassword({email:accountEmail(id),password:pw});
+        const {error}=await window.sbClient.auth.signInWithPassword({email:accountEmail(id),password:pw});
         if(error) throw error;
         if(document.getElementById('rememberId').checked) localStorage.setItem('remembered_account_id',id);
         else localStorage.removeItem('remembered_account_id');
@@ -817,16 +817,16 @@
     }
     async function saveState() {
       if(!currentAccount) return;
-      const {data,error:userError}=await sbClient.auth.getUser();
+      const {data,error:userError}=await window.sbClient.auth.getUser();
       if(userError || !data.user) return;
       const payload={members:state.members,transactions:state.transactions,fixedExpenses:state.fixedExpenses||[],
         customSubcats:state.customSubcats,customDescs:state.customDescs,theme:state.theme||'light'};
-      const {error}=await sbClient.from('gagyeboo_data').upsert(
+      const {error}=await window.sbClient.from('gagyeboo_data').upsert(
         {user_id:data.user.id,data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});
       if(error){console.error(error);alert(`저장에 실패했습니다: ${error.message}`);}
     }
     async function handleLogout() {
-      await sbClient.auth.signOut(); currentAccount=null;
+      await window.sbClient.auth.signOut(); currentAccount=null;
       localStorage.removeItem('gagyeboo_account_name');
       document.getElementById('authView').classList.remove('hidden');
       document.getElementById('mainAppView').classList.add('hidden');
@@ -1969,7 +1969,7 @@
       document.getElementById(`tabBtn${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "flex-1 py-3 text-center border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold";
     }
 
-    (async()=>{ const {data}=await sbClient.auth.getSession(); if(data.session){
+    (async()=>{ const {data}=await window.sbClient.auth.getSession(); if(data.session){
       const u=data.session.user; currentAccount=u.user_metadata?.username || u.email.split('@')[0];
       await loadAccountData(currentAccount);
     }})();
