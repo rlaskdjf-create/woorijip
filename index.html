@@ -1969,8 +1969,6 @@
       document.getElementById(`tabBtn${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "flex-1 py-3 text-center border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold";
     }
 
-  </script>
-<script>
     (async()=>{ const {data}=await sbClient.auth.getSession(); if(data.session){
       const u=data.session.user; currentAccount=u.user_metadata?.username || u.email.split('@')[0];
       await loadAccountData(currentAccount);
