@@ -749,33 +749,16 @@
     // Supabase Auth + Row Level Security
     const SUPABASE_URL = "https://aysfzfhixtzuwehvszyo.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_QgBz80voMVhkFcx-VmBjEw_o2OMNkto";
-    // 자동로그인 선택 여부에 따라 세션 저장소를 분리합니다.
-    // 체크 O: 이 브라우저 프로필의 localStorage / 체크 X: 현재 브라우저 탭의 sessionStorage
+    // Supabase 기본 Storage API를 그대로 사용하되, 로그인 전에 선택한 저장소로 클라이언트를 생성합니다.
     const AUTH_STORAGE_KEY = 'sb-aysfzfhixtzuwehvszyo-auth-token';
     const AUTO_LOGIN_FLAG = 'gagyeboo_auto_login_enabled';
-    const authStorage = {
-      // Supabase Auth의 Storage 인터페이스는 Promise 기반으로 구현합니다.
-      async getItem(key) {
-        const store = localStorage.getItem(AUTO_LOGIN_FLAG) === '1' ? localStorage : sessionStorage;
-        return store.getItem(key);
-      },
-      async setItem(key, value) {
-        const keep = localStorage.getItem(AUTO_LOGIN_FLAG) === '1';
-        const target = keep ? localStorage : sessionStorage;
-        const other = keep ? sessionStorage : localStorage;
-        other.removeItem(key);
-        target.setItem(key, value);
-      },
-      async removeItem(key) {
-        localStorage.removeItem(key);
-        sessionStorage.removeItem(key);
-      }
-    };
-    // 이전 버전의 장기 저장 세션은 자동로그인 선택이 없으면 사용하지 않습니다.
-    if (localStorage.getItem(AUTO_LOGIN_FLAG) !== '1') localStorage.removeItem(AUTH_STORAGE_KEY);
-    window.sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { storage: authStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-    });
+    function createAuthClient(keepLoggedIn) {
+      return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { storage: keepLoggedIn ? localStorage : sessionStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
+    }
+    const initialAutoLogin = localStorage.getItem(AUTO_LOGIN_FLAG) === '1';
+    window.sbClient = createAuthClient(initialAutoLogin);
     let currentAccount = null;
     const DEFAULT_SUBCATS = {'수입':['월급여(소득)','부수입'],'지출':['고정비','생활비','여가비','비상금'],'저축':['예금/적금','저금']};
     let state = {
@@ -793,9 +776,10 @@
     document.getElementById('autoLogin').checked = localStorage.getItem('gagyeboo_auto_login_enabled') === '1';
     async function accountEmail(id) {
       const normalized = id.normalize('NFC').trim();
-      // 기존 영문/숫자/기호 ID는 과거 계정과 호환되도록 기존 규칙을 그대로 유지합니다.
-      if (/^[a-zA-Z0-9._-]+$/.test(normalized)) return `${normalized.toLowerCase()}@woorijip.app`;
-      // 한글, 공백, 이모지 등 그 외 문자는 삭제하지 않고 UTF-8 SHA-256으로 고정 변환합니다.
+      // 기존 계정 호환: 영문/숫자/기호는 원본 버전과 동일한 정규화 규칙을 사용합니다.
+      const legacy = normalized.toLowerCase().replace(/[^a-z0-9._-]/g, '');
+      if (/^[a-z0-9._-]+$/.test(legacy)) return `${legacy}@woorijip.app`;
+      // 한글 등 기존 규칙에서 손실되는 ID만 안정적인 해시 주소로 변환합니다.
       const bytes = new TextEncoder().encode(normalized);
       const digest = await crypto.subtle.digest('SHA-256', bytes);
       const hex = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
@@ -856,13 +840,12 @@
       const id=document.getElementById('loginId').value.trim(), pw=document.getElementById('loginPw').value;
       try {
         const keepLoggedIn = document.getElementById('autoLogin').checked;
-        // 로그인 전에 저장 위치를 먼저 결정해야 세션이 올바른 저장소에 기록됩니다.
+        // 체크 상태에 맞는 브라우저 기본 저장소로 인증 클라이언트를 새로 만듭니다.
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        sessionStorage.removeItem(AUTH_STORAGE_KEY);
         if (keepLoggedIn) localStorage.setItem(AUTO_LOGIN_FLAG, '1');
-        else {
-          localStorage.removeItem(AUTO_LOGIN_FLAG);
-          localStorage.removeItem(AUTH_STORAGE_KEY);
-          sessionStorage.removeItem(AUTH_STORAGE_KEY);
-        }
+        else localStorage.removeItem(AUTO_LOGIN_FLAG);
+        window.sbClient = createAuthClient(keepLoggedIn);
         const {error}=await window.sbClient.auth.signInWithPassword({email:await accountEmail(id),password:pw});
         if(error) throw error;
         if(document.getElementById('rememberId').checked) localStorage.setItem('remembered_account_id',id);
