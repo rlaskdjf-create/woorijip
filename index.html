@@ -749,12 +749,19 @@
     // Supabase Auth + Row Level Security
     const SUPABASE_URL = "https://aysfzfhixtzuwehvszyo.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_QgBz80voMVhkFcx-VmBjEw_o2OMNkto";
-    // Supabase 기본 Storage API를 그대로 사용하되, 로그인 전에 선택한 저장소로 클라이언트를 생성합니다.
+    // 자동로그인 선택에 따라 세션 저장소를 분리합니다.
     const AUTH_STORAGE_KEY = 'sb-aysfzfhixtzuwehvszyo-auth-token';
     const AUTO_LOGIN_FLAG = 'gagyeboo_auto_login_enabled';
+    // 체크하지 않은 경우 브라우저 메모리에만 보관합니다. 새로고침하면 메모리가 초기화되어 로그아웃됩니다.
+    const memoryAuthValues = Object.create(null);
+    const memoryAuthStorage = {
+      getItem: (key) => Object.prototype.hasOwnProperty.call(memoryAuthValues, key) ? memoryAuthValues[key] : null,
+      setItem: (key, value) => { memoryAuthValues[key] = value; },
+      removeItem: (key) => { delete memoryAuthValues[key]; }
+    };
     function createAuthClient(keepLoggedIn) {
       return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: { storage: keepLoggedIn ? localStorage : sessionStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+        auth: { storage: keepLoggedIn ? localStorage : memoryAuthStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
     }
     const initialAutoLogin = localStorage.getItem(AUTO_LOGIN_FLAG) === '1';
