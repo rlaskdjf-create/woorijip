@@ -321,78 +321,55 @@
 
 
 <style id="dashboard-reference-design">
-/* 대시보드 공통 */
-#tabContentDashboard {
-  gap: 16px !important;
-}
-
-/* 라이트모드 카드 */
-#tabContentDashboard > div {
-  background: #ffffff !important;
-  color: #1e293b !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 22px !important;
-  box-shadow: 0 5px 16px rgba(15,23,42,.07) !important;
-  padding: 16px !important;
-}
-
-#tabContentDashboard h3 {
-  color: #1e293b !important;
-  font-size: clamp(17px, 4.4vw, 22px) !important;
-  font-weight: 800 !important;
-  letter-spacing: -.04em;
-}
-
-/* 다크모드 카드 */
-.dark body {
-  background: radial-gradient(
-    ellipse at 50% -15%,
-    #263c70 0%,
-    #111a30 46%,
-    #0b1222 100%
-  ) !important;
-}
-
-.dark #tabContentDashboard > div {
-  background: linear-gradient(145deg,#26344e 0%,#1b2940 100%) !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #405474 !important;
-  box-shadow: 0 8px 22px rgba(0,0,0,.20),
-              inset 0 1px 0 rgba(255,255,255,.05) !important;
-}
-
-.dark #tabContentDashboard h3 {
-  color: #f3f6ff !important;
-}
-
-#tabContentDashboard #monthlyTrendChart {
-  color: #64748b;
-}
-
-.dark #tabContentDashboard #monthlyTrendChart {
-  color: #b5c4df;
-}
-
-/* 이번 달 고정 내역 */
-.dark #fixedMonthlyBreakdown button .font-semibold,
-.dark #fixedMonthlyBreakdown button .font-bold {
-  color: #f4f6ff !important;
-}
-
-.dark #fixedMonthlyBreakdown .bg-slate-50\/70 {
-  background: rgba(8,17,33,.28) !important;
-}
-
-/* 모바일 */
+/* 대시보드 전용: 제공된 참고 이미지의 네이비 카드 UI */
+.dark body { background: radial-gradient(ellipse at 50% -15%, #263c70 0%, #111a30 46%, #0b1222 100%) !important; }
+#tabContentDashboard { gap:16px !important; }
+/* 라이트모드 대시보드 카드 */
+#tabContentDashboard > div { background:#fff !important; color:#1e293b !important; border:1px solid #e2e8f0 !important; border-radius:22px !important; box-shadow:0 5px 16px rgba(15,23,42,.07) !important; padding:16px !important; }
+/* 다크모드에서만 네이비 카드 유지 */
+.dark #tabContentDashboard > div { background:linear-gradient(145deg,#26344e 0%,#1b2940 100%) !important; color:#f1f5f9 !important; border:1px solid #405474 !important; box-shadow:0 8px 22px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.05) !important; }
+#tabContentDashboard h3 { color:#1e293b !important; }
+.dark #tabContentDashboard h3 { color:#f3f6ff !important; }
+#tabContentDashboard #monthlyTrendChart { color:#64748b; }
+.dark #tabContentDashboard #monthlyTrendChart { color:#b5c4df; }
+.dark #tabContentDashboard h3 { color:#f3f6ff !important; font-size:clamp(17px,4.4vw,22px) !important; font-weight:800 !important; letter-spacing:-.04em; }
+.dark #periodComparisons { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px !important; }
+.dark #periodComparisons > .rounded-xl { min-width:0; border:1px solid #405474; border-radius:18px; background:linear-gradient(145deg,#25344f,#1b2940) !important; padding:13px !important; }
+.dark #periodComparisons > .rounded-xl:first-child { grid-column:1 / -1; background:linear-gradient(120deg,#203d70,#293b63) !important; border-color:#4269a6; }
+.dark #periodComparisons > .rounded-xl:first-child > div:first-child { font-size:18px !important; color:#f4f7ff; }
+.dark #periodComparisons > .rounded-xl:first-child .grid { gap:9px !important; }
+.dark #periodComparisons > .rounded-xl:first-child .grid > div { border:1px solid rgba(133,169,230,.35); border-radius:15px; padding:14px 5px !important; background:rgba(12,31,62,.38) !important; }
+.dark #periodComparisons > .rounded-xl:first-child .summary-amount { font-size:clamp(15px,4.1vw,22px) !important; color:#fff !important; }
+.dark #periodComparisons > .rounded-xl:first-child .grid > div:nth-child(1) { background:linear-gradient(145deg,#244f91,#1e3d70) !important; }
+.dark #periodComparisons > .rounded-xl:first-child .grid > div:nth-child(2) { background:linear-gradient(145deg,#71365f,#482944) !important; }
+.dark #periodComparisons > .rounded-xl:first-child .grid > div:nth-child(3) { background:linear-gradient(145deg,#17665b,#164b49) !important; }
+.dark #periodComparisons > .rounded-xl:not(:first-child) > div:first-child { color:#f1f5ff; font-size:15px !important; margin-bottom:10px !important; }
+.dark #periodComparisons > .rounded-xl:not(:first-child) .space-y-2\.5 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; }
+.dark #periodComparisons > .rounded-xl:not(:first-child) .space-y-2\.5 > div { display:flex; flex-direction:column; align-items:center !important; text-align:center; border-right:1px solid #455675; padding:0 3px; gap:4px !important; }
+.dark #periodComparisons > .rounded-xl:not(:first-child) .space-y-2\.5 > div:last-child { border-right:0; }
+.dark #periodComparisons .summary-amount { font-size:clamp(11px,3vw,16px) !important; }
+.dark #periodComparisons .text-\[10px\] { font-size:10px !important; }
+.dark #tabContentDashboard > div:has(#fixedMonthlyBreakdown) h3 { font-size:20px !important; }
+.dark #fixedMonthlyBreakdown > .rounded-xl { border:0 !important; border-radius:0 !important; background:transparent !important; overflow:visible !important; }
+.dark #fixedMonthlyBreakdown > .rounded-xl > div { border-color:#405474 !important; }
+.dark #fixedMonthlyBreakdown button { min-height:48px; padding:10px 4px !important; }
+.dark #fixedMonthlyBreakdown button .font-semibold { color:#f4f6ff !important; font-size:15px !important; }
+.dark #fixedMonthlyBreakdown button .font-bold { color:#f4f6ff !important; font-size:15px !important; }
+.dark #fixedMonthlyBreakdown button .text-rose-600, .dark #fixedMonthlyBreakdown button .text-rose-300 { color:#ff315b !important; }
+.dark #fixedMonthlyBreakdown button .text-emerald-600, .dark #fixedMonthlyBreakdown button .text-emerald-300 { color:#54d6a3 !important; }
+.dark #fixedMonthlyBreakdown button .text-indigo-600, .dark #fixedMonthlyBreakdown button .text-indigo-300 { color:#a78bfa !important; }
+.dark #fixedMonthlyBreakdown .bg-slate-50\/70 { background:rgba(8,17,33,.28) !important; }
+.dark #tabContentDashboard #monthlyTrendChart { min-height:160px; }
+.dark #tabContentDashboard #monthlyTrendChart svg { max-width:100%; height:auto; }
+.dark #tabContentDashboard .text-slate-400 { color:#b5c4df !important; }
 @media(max-width:520px) {
-  #tabContentDashboard {
-    gap: 14px !important;
-  }
-
-  #tabContentDashboard > div {
-    padding: 13px !important;
-    border-radius: 19px !important;
-  }
+  #tabContentDashboard { gap:14px !important; }
+  #tabContentDashboard > div { padding:13px !important; border-radius:19px !important; }
+  .dark #periodComparisons { gap:9px !important; }
+  .dark #periodComparisons > .rounded-xl:not(:first-child) { padding:10px 7px !important; }
+  .dark #periodComparisons > .rounded-xl:not(:first-child) .space-y-2\.5 { grid-template-columns:1fr; gap:7px; }
+  .dark #periodComparisons > .rounded-xl:not(:first-child) .space-y-2\.5 > div { flex-direction:row; justify-content:space-between; border-right:0; border-bottom:1px solid #405474; padding:4px 0 7px; text-align:left; }
+  .dark #periodComparisons > .rounded-xl:not(:first-child) .space-y-2\.5 > div:last-child { border-bottom:0; }
 }
 </style>
 
@@ -523,19 +500,15 @@
       <!-- [탭 1] 대시보드 -->
       <section id="tabContentDashboard" class="space-y-6 pb-[44px]">
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm space-y-3">
-          <h3 class="text-base sm:text-lg font-bold">기간별 수입·지출·저축 요약</h3>
+          <h3 class="text-base sm:text-lg font-bold">수입·지출·저축 요약</h3>
           <div id="periodComparisons" class="space-y-2 text-base sm:text-lg"></div>
           <style>#periodComparisons, #periodComparisons * { font-size: inherit !important; }</style>
         </div>
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm space-y-3">
-          <div class="flex items-center justify-between gap-3"><h3 class="text-base sm:text-lg font-bold">이번 달 고정 내역</h3><div class="text-sm sm:text-base font-extrabold text-slate-700 dark:text-slate-100 whitespace-nowrap">총 <span id="fixedMonthlyGrandTotal">0원</span></div></div>
-          <div class="text-[11px] text-slate-400 -mt-2">항목을 누르면 상세 내역</div>
-          <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="rounded-xl bg-emerald-50 dark:bg-emerald-950/20 p-3"><div class="text-xs font-semibold text-emerald-600 mb-1">수입</div><button type="button" id="fixedMonthlyIncome" onclick="openFixedMonthlyDetails('수입')" class="font-bold text-sm text-emerald-700 dark:text-emerald-300 underline underline-offset-2">0원</button></div>
-            <div class="rounded-xl bg-rose-50 dark:bg-rose-950/20 p-3"><div class="text-xs font-semibold text-rose-600 mb-1">지출</div><button type="button" id="fixedMonthlyExpense" onclick="openFixedMonthlyDetails('지출')" class="font-bold text-sm text-rose-700 dark:text-rose-300 underline underline-offset-2">0원</button></div>
-            <div class="rounded-xl bg-indigo-50 dark:bg-indigo-950/20 p-3"><div class="text-xs font-semibold text-indigo-600 mb-1">저축</div><button type="button" id="fixedMonthlySaving" onclick="openFixedMonthlyDetails('저축')" class="font-bold text-sm text-indigo-700 dark:text-indigo-300 underline underline-offset-2">0원</button></div>
-          </div>
-          <div id="fixedMonthlyBreakdown" class="space-y-3"></div>
+          <div class="flex items-center justify-between gap-3"><h3 class="text-base sm:text-lg font-bold">이번 달 고정 내역</h3><button type="button" onclick="openFixedMonthlyDetails('ALL')" class="text-sm font-bold text-indigo-600 dark:text-indigo-300 whitespace-nowrap">전체 보기 <i class="fa-solid fa-chevron-right ml-1 text-xs"></i></button></div>
+          <div class="text-[11px] text-slate-400 -mt-2">금액이 큰 순서로 상위 5개 표시 · 금액을 누르면 구성원별 상세 내역</div>
+          <div id="fixedMonthlyGrandTotal" class="hidden">0원</div>
+          <div id="fixedMonthlyBreakdown" class="space-y-0"></div>
         </div>
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm space-y-3">
           <div class="flex items-center justify-between gap-2 flex-wrap">
@@ -574,7 +547,7 @@
         <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm space-y-4">
           <div class="flex items-center justify-between gap-3 flex-wrap">
             <h3 class="text-lg sm:text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-              <i class="fa-solid fa-chart-pie text-indigo-500"></i> 이번달 요약
+              <i class="fa-solid fa-chart-pie text-indigo-500"></i> 이번 달 요약
             </h3>
             <div class="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400">총 수입 <span id="statSummaryIncome">0만원</span></div>
           </div>
@@ -776,7 +749,20 @@
     // Supabase Auth + Row Level Security
     const SUPABASE_URL = "https://aysfzfhixtzuwehvszyo.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_QgBz80voMVhkFcx-VmBjEw_o2OMNkto";
-    window.sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // 자동로그인 선택 여부에 따라 세션 저장소를 분리합니다.
+    // 체크 O: 이 브라우저 프로필의 localStorage / 체크 X: 현재 브라우저 탭의 sessionStorage
+    const AUTH_STORAGE_KEY = 'sb-aysfzfhixtzuwehvszyo-auth-token';
+    const AUTO_LOGIN_FLAG = 'gagyeboo_auto_login_enabled';
+    const authStorage = {
+      getItem(key) { return (localStorage.getItem(AUTO_LOGIN_FLAG) === '1' ? localStorage : sessionStorage).getItem(key); },
+      setItem(key, value) { (localStorage.getItem(AUTO_LOGIN_FLAG) === '1' ? localStorage : sessionStorage).setItem(key, value); },
+      removeItem(key) { localStorage.removeItem(key); sessionStorage.removeItem(key); }
+    };
+    // 과거 버전에서 자동 저장된 세션은 사용하지 않도록 정리합니다.
+    if (localStorage.getItem(AUTO_LOGIN_FLAG) !== '1') localStorage.removeItem(AUTH_STORAGE_KEY);
+    window.sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { storage: authStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
     let currentAccount = null;
     const DEFAULT_SUBCATS = {'수입':['월급여(소득)','부수입'],'지출':['고정비','생활비','여가비','비상금'],'저축':['예금/적금','저금']};
     let state = {
@@ -791,6 +777,7 @@
     const rememberedId = localStorage.getItem('remembered_account_id') || '';
     document.getElementById('loginId').value = rememberedId;
     document.getElementById('rememberId').checked = Boolean(rememberedId);
+    document.getElementById('autoLogin').checked = localStorage.getItem('gagyeboo_auto_login_enabled') === '1';
     function accountEmail(id) { return `${id.trim().toLowerCase().replace(/[^a-z0-9._-]/g,'')}@woorijip.app`; }
     function switchAuthTab(tab) {
       const login = tab === 'login';
@@ -846,6 +833,14 @@
       e.preventDefault();
       const id=document.getElementById('loginId').value.trim(), pw=document.getElementById('loginPw').value;
       try {
+        const keepLoggedIn = document.getElementById('autoLogin').checked;
+        // 로그인 전에 저장 위치를 먼저 결정해야 세션이 올바른 저장소에 기록됩니다.
+        if (keepLoggedIn) localStorage.setItem(AUTO_LOGIN_FLAG, '1');
+        else {
+          localStorage.removeItem(AUTO_LOGIN_FLAG);
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+          sessionStorage.removeItem(AUTH_STORAGE_KEY);
+        }
         const {error}=await window.sbClient.auth.signInWithPassword({email:accountEmail(id),password:pw});
         if(error) throw error;
         if(document.getElementById('rememberId').checked) localStorage.setItem('remembered_account_id',id);
@@ -866,6 +861,9 @@
     }
     async function handleLogout() {
       await window.sbClient.auth.signOut(); currentAccount=null;
+      localStorage.removeItem(AUTH_STORAGE_KEY); sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem(AUTO_LOGIN_FLAG);
+      document.getElementById('autoLogin').checked = false;
       localStorage.removeItem('gagyeboo_account_name');
       document.getElementById('authView').classList.remove('hidden');
       document.getElementById('mainAppView').classList.add('hidden');
@@ -1495,12 +1493,12 @@
         return `<div class="grid grid-cols-3 gap-2 sm:gap-3">${rows.map(([name,value,color,icon,bg]) => `<div class="min-w-0 rounded-xl ${bg} p-2.5 sm:p-3 text-center"><div class="flex items-center justify-center gap-1.5 mb-2"><i class="fa-solid ${icon} ${color} text-base sm:text-lg" aria-hidden="true"></i><span class="${color} font-semibold text-xs sm:text-sm">${name}</span></div><div class="flex justify-center">${amountButton(value,color)}</div></div>`).join('')}</div>`;
       };
       const comparisonRows = (base, now) => {
-        const rows = [['수입',base.inc,now.inc,'text-emerald-600 dark:text-emerald-400'],['지출',base.exp,now.exp,'text-rose-600 dark:text-rose-400'],['저축',base.sav,now.sav,'text-indigo-600 dark:text-indigo-400']];
-        return `<div class="space-y-2.5">${rows.map(([name,a,b,color]) => { const diff=b-a; const pct=a ? (diff/Math.abs(a))*100 : (b ? 100 : 0); const sign=diff>0?'+':''; return `<div class="flex items-center justify-between gap-3 min-w-0"><span class="${color} shrink-0 font-medium">${name}</span><div class="flex flex-col items-end min-w-0"><div class="max-w-full">${amountButton(diff,color,true)}</div><span class="text-[10px] ${diff>0?'text-indigo-500':diff<0?'text-rose-500':'text-slate-400'} whitespace-nowrap">${sign}${pct.toFixed(1)}%</span></div></div>`; }).join('')}</div>`;
+        const rows = [['수입',base.inc,now.inc,'text-emerald-600 dark:text-emerald-400','fa-wallet','bg-emerald-100 dark:bg-emerald-900/30'],['지출',base.exp,now.exp,'text-rose-600 dark:text-rose-400','fa-credit-card','bg-rose-100 dark:bg-rose-900/30'],['저축',base.sav,now.sav,'text-indigo-600 dark:text-indigo-400','fa-piggy-bank','bg-indigo-100 dark:bg-indigo-900/30']];
+        return `<div class="grid grid-cols-3 gap-2 sm:gap-3">${rows.map(([name,a,b,color,icon,bg]) => { const diff=b-a; const pct=a ? (diff/Math.abs(a))*100 : (b ? 100 : 0); const sign=diff>0?'+':''; const pctColor=diff>0?'text-indigo-500':diff<0?'text-rose-500':'text-slate-400'; return `<div class="min-w-0 rounded-xl ${bg} p-2.5 sm:p-3 text-center"><div class="flex items-center justify-center gap-1.5 mb-2"><i class="fa-solid ${icon} ${color} text-base sm:text-lg" aria-hidden="true"></i><span class="${color} font-semibold text-xs sm:text-sm">${name}</span></div><div class="flex flex-col items-center gap-1"><div class="max-w-full">${amountButton(diff,color,true)}</div><span class="text-xs sm:text-sm ${pctColor} whitespace-nowrap">${sign}${pct.toFixed(1)}%</span></div></div>`; }).join('')}</div>`;
       };
       const panel = (label, content) => `<div class="rounded-xl bg-slate-50 dark:bg-slate-700/40 p-3 sm:p-4"><div class="font-bold mb-3">${label}</div>${content}</div>`;
       document.getElementById('periodComparisons').innerHTML =
-        panel('이번달', amountRows(currentTotals)) +
+        panel('이번 달', amountRows(currentTotals)) +
         panel('전달 대비', comparisonRows(previousTotals, currentTotals)) +
         panel('전체 누적 평균 대비', comparisonRows(average, currentTotals));
     }
@@ -1585,12 +1583,6 @@
     }
 
     function renderFixedMonthlySummary() {
-      const map = { '수입': 'fixedMonthlyIncome', '지출': 'fixedMonthlyExpense', '저축': 'fixedMonthlySaving' };
-      Object.entries(map).forEach(([type, id]) => {
-        const total = getCurrentMonthFixedItems(type).reduce((sum, item) => sum + item.displayAmount, 0);
-        const button = document.getElementById(id);
-        if (button) button.textContent = formatRoundedManwon(total);
-      });
       renderFixedMonthlyBreakdown();
     }
 
@@ -1627,15 +1619,15 @@
         host.innerHTML = '<p class="text-center text-xs text-slate-400 py-3">등록된 고정 내역이 없습니다.</p>';
         return;
       }
-      host.innerHTML = `<div class="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">${groups.map(group => {
+      host.innerHTML = `<div class="divide-y divide-slate-100 dark:divide-slate-700">${groups.slice(0, 5).map(group => {
         const isOpen = active === group.key;
         const color = typeStyles[group.type] || 'text-slate-600 dark:text-slate-300';
         const rows = [...group.items].sort((a, b) => {
           const dayA = Number(a.day) || 1;
           const dayB = Number(b.day) || 1;
           return dayA - dayB || String(a.person || '공통').localeCompare(String(b.person || '공통'), 'ko');
-        }).map(item => `<div class="flex items-center justify-between gap-3 px-3 py-2 text-xs sm:text-sm border-t border-slate-100 dark:border-slate-700"><div class="min-w-0 text-slate-500 dark:text-slate-400"><span class="font-semibold">${escapeHtml(item.person || '공통')}</span><span class="mx-1">·</span><span>매월 ${Number(item.day) || 1}일</span><span class="mx-1">·</span><span>${item.type}</span></div><div class="font-semibold whitespace-nowrap ${color}">${Number(item.displayAmount || 0).toLocaleString('ko-KR')}원</div></div>`).join('');
-        return `<div class="border-b last:border-b-0 border-slate-100 dark:border-slate-700"><button type="button" aria-expanded="${isOpen}" onclick="toggleFixedMonthlyBreakdown(${JSON.stringify(group.key).replace(/</g, '\\u003c')})" class="w-full flex items-center justify-between gap-2 px-3 py-3 text-left"><span class="min-w-0 flex items-center gap-2"><span class="font-semibold text-sm text-slate-700 dark:text-slate-200">${escapeHtml(group.content)}</span><span class="text-[10px] font-bold ${color}">${group.type}</span></span><span class="flex items-center gap-2 shrink-0"><span class="font-bold text-sm ${color}">${Number(group.total).toLocaleString('ko-KR')}원</span><i class="fa-solid fa-chevron-${isOpen ? 'up' : 'down'} text-xs text-slate-400"></i></span></button>${isOpen ? `<div class="bg-slate-50/70 dark:bg-slate-900/30">${rows}</div>` : ''}</div>`;
+        }).map(item => `<div class="flex items-center justify-between gap-3 pl-4 py-2 text-xs sm:text-sm"><div class="min-w-0 text-slate-500 dark:text-slate-400"><span class="font-semibold">${escapeHtml(item.person || '공통')}</span><span class="mx-1">·</span><span>매월 ${Number(item.day) || 1}일</span></div><div class="font-semibold whitespace-nowrap ${color}">${Number(item.displayAmount || 0).toLocaleString('ko-KR')}원</div></div>`).join('');
+        return `<div class="py-0.5"><button type="button" aria-expanded="${isOpen}" onclick="toggleFixedMonthlyBreakdown(${JSON.stringify(group.key).replace(/</g, '\\u003c')})" class="w-full flex items-center justify-between gap-2 py-3 text-left"><span class="min-w-0 flex items-center gap-2"><span class="text-[10px] font-bold ${color} shrink-0">${group.type}</span><span class="font-semibold text-sm text-slate-700 dark:text-slate-200">${escapeHtml(group.content)}</span></span><span class="flex items-center gap-2 shrink-0"><span class="font-bold text-sm ${color}">${Number(group.total).toLocaleString('ko-KR')}원</span><i class="fa-solid fa-chevron-${isOpen ? 'up' : 'down'} text-xs text-slate-400"></i></span></button>${isOpen ? `<div class="mb-2 rounded-lg bg-slate-50/70 dark:bg-slate-900/30">${rows}</div>` : ''}</div>`;
       }).join('')}</div>`;
     }
 
@@ -1667,37 +1659,35 @@
 
     function renderFixedMonthlyDetailsList() {
       const type = state.activeFixedDetailType || '지출';
-      const items = getCurrentMonthFixedItems(type).filter(item => state.selectedFixedDetailMemberFilter === 'ALL' || item.person === state.selectedFixedDetailMemberFilter);
-      const colors = { '수입': 'text-emerald-600', '지출': 'text-rose-600', '저축': 'text-indigo-600' };
+      const types = type === 'ALL' ? ['수입', '지출', '저축'] : [type];
+      const items = types.flatMap(itemType => getCurrentMonthFixedItems(itemType).map(item => ({ ...item, type: itemType })))
+        .filter(item => state.selectedFixedDetailMemberFilter === 'ALL' || item.person === state.selectedFixedDetailMemberFilter);
+      const colors = { '수입': 'text-emerald-600 dark:text-emerald-300', '지출': 'text-rose-600 dark:text-rose-300', '저축': 'text-indigo-600 dark:text-indigo-300' };
       const host = document.getElementById('fixedMonthlyDetailList');
-      const monthNumber = Number((state.selectedMonth || currentMonthKey()).split('-')[1]);
       const getContent = item => String(item.desc || item.name || item.subcategory || '고정 내역').trim();
       const grouped = new Map();
       items.forEach(item => {
         const content = getContent(item);
-        if (!grouped.has(content)) grouped.set(content, { content, total: 0, items: [] });
-        const group = grouped.get(content);
+        const key = `${item.type}::${content}`;
+        if (!grouped.has(key)) grouped.set(key, { content, type: item.type, total: 0, items: [] });
+        const group = grouped.get(key);
         group.total += Number(item.displayAmount) || 0;
         group.items.push(item);
       });
-      const groups = [...grouped.values()].map(group => {
-        group.items.sort((a, b) => (Number(a.day) || 1) - (Number(b.day) || 1) || String(a.person || '').localeCompare(String(b.person || ''), 'ko'));
-        group.firstDay = Math.min(...group.items.map(item => Number(item.day) || 1));
-        return group;
-      }).sort((a, b) => a.firstDay - b.firstDay || a.content.localeCompare(b.content, 'ko'));
+      const groups = [...grouped.values()].sort((a, b) => b.total - a.total || a.content.localeCompare(b.content, 'ko'));
 
       if (!groups.length) {
         host.innerHTML = '<p class="text-center text-sm text-slate-400 py-6">선택한 구성원의 이번 달 내역이 없습니다.</p>';
       } else {
         host.innerHTML = groups.map(group => {
-          const rows = group.items.map(item => {
+          const rows = group.items.sort((a, b) => (Number(a.day) || 1) - (Number(b.day) || 1) || String(a.person || '').localeCompare(String(b.person || ''), 'ko')).map(item => {
             const day = Number(item.day) || 1;
-            return `<div class="flex items-center justify-between gap-3 pl-3 py-1.5 border-l-2 border-slate-200 dark:border-slate-600"><div class="min-w-0 text-xs sm:text-sm text-slate-600 dark:text-slate-300"><span class="font-semibold">${escapeHtml(item.person || '공통')}</span><span class="mx-1">·</span><span>매월 ${day}일</span></div><div class="font-semibold text-xs sm:text-sm whitespace-nowrap ${colors[type]}">${Number(item.displayAmount || 0).toLocaleString('ko-KR')}원</div></div>`;
+            return `<div class="flex items-center justify-between gap-3 pl-3 py-1.5 border-l-2 border-slate-200 dark:border-slate-600"><div class="min-w-0 text-xs sm:text-sm text-slate-600 dark:text-slate-300"><span class="font-semibold">${escapeHtml(item.person || '공통')}</span><span class="mx-1">·</span><span>매월 ${day}일</span></div><div class="font-semibold text-xs sm:text-sm whitespace-nowrap ${colors[item.type]}">${Number(item.displayAmount || 0).toLocaleString('ko-KR')}원</div></div>`;
           }).join('');
-          return `<section class="rounded-xl border border-slate-200 dark:border-slate-700 p-3 space-y-2"><div class="fixed-detail-group-heading"><div class="fixed-detail-group-name">${escapeHtml(group.content)}</div><div class="fixed-detail-group-total ${colors[type]}">총 ${Number(group.total).toLocaleString('ko-KR')}원</div></div><div class="space-y-1">${rows}</div></section>`;
+          return `<section class="rounded-xl border border-slate-200 dark:border-slate-700 p-3 space-y-2"><div class="fixed-detail-group-heading"><div class="min-w-0 flex items-center gap-2"><span class="text-[10px] font-bold ${colors[group.type]}">${group.type}</span><div class="fixed-detail-group-name">${escapeHtml(group.content)}</div></div><div class="fixed-detail-group-total ${colors[group.type]}">총 ${Number(group.total).toLocaleString('ko-KR')}원</div></div><div class="space-y-1">${rows}</div></section>`;
         }).join('');
       }
-      const detailTotal = items.reduce((sum, item) => sum + item.displayAmount, 0);
+      const detailTotal = items.reduce((sum, item) => sum + (Number(item.displayAmount) || 0), 0);
       document.getElementById('fixedMonthlyDetailTotal').textContent = Number(detailTotal).toLocaleString('ko-KR') + '원';
     }
 
@@ -1705,7 +1695,7 @@
       state.activeFixedDetailType = type;
       state.selectedFixedDetailMemberFilter = 'ALL';
       const [detailYear, detailMonth] = (state.selectedMonth || currentMonthKey()).split('-');
-      document.getElementById('fixedMonthlyDetailTitle').textContent = `${String(detailYear).slice(-2)}.${String(detailMonth).padStart(2, '0')} 고정 ${type} 내역`;
+      document.getElementById('fixedMonthlyDetailTitle').textContent = type === 'ALL' ? `${String(detailYear).slice(-2)}.${String(detailMonth).padStart(2, '0')} 고정 내역 전체 보기` : `${String(detailYear).slice(-2)}.${String(detailMonth).padStart(2, '0')} 고정 ${type} 내역`;
       renderFixedMonthlyDetailMemberFilter();
       renderFixedMonthlyDetailsList();
       openModal('modalFixedMonthlyDetails');
