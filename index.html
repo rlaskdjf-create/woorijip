@@ -791,7 +791,16 @@
     document.getElementById('loginId').value = rememberedId;
     document.getElementById('rememberId').checked = Boolean(rememberedId);
     document.getElementById('autoLogin').checked = localStorage.getItem('gagyeboo_auto_login_enabled') === '1';
-    function accountEmail(id) { return `${id.trim().toLowerCase().replace(/[^a-z0-9._-]/g,'')}@woorijip.app`; }
+    async function accountEmail(id) {
+      const normalized = id.normalize('NFC').trim();
+      // 기존 영문/숫자/기호 ID는 과거 계정과 호환되도록 기존 규칙을 그대로 유지합니다.
+      if (/^[a-zA-Z0-9._-]+$/.test(normalized)) return `${normalized.toLowerCase()}@woorijip.app`;
+      // 한글, 공백, 이모지 등 그 외 문자는 삭제하지 않고 UTF-8 SHA-256으로 고정 변환합니다.
+      const bytes = new TextEncoder().encode(normalized);
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      const hex = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+      return `${hex}@woorijip.app`;
+    }
     function switchAuthTab(tab) {
       const login = tab === 'login';
       document.getElementById('loginForm').classList.toggle('hidden',!login);
@@ -827,7 +836,7 @@
       if(id.length<2 || id.length>40){alert('아이디는 2~40자로 입력해주세요.');return;}
       if(pw.length<8){alert('비밀번호는 8자 이상으로 설정해주세요.');return;}
       try {
-        const {data,error}=await window.sbClient.auth.signUp({email:accountEmail(id),password:pw,options:{data:{username:id}}});
+        const {data,error}=await window.sbClient.auth.signUp({email:await accountEmail(id),password:pw,options:{data:{username:id}}});
         if(error) throw error;
         // 회원가입 직후 발급된 세션을 종료해 자동 로그인되지 않도록 처리
         if(data.session){
@@ -854,7 +863,7 @@
           localStorage.removeItem(AUTH_STORAGE_KEY);
           sessionStorage.removeItem(AUTH_STORAGE_KEY);
         }
-        const {error}=await window.sbClient.auth.signInWithPassword({email:accountEmail(id),password:pw});
+        const {error}=await window.sbClient.auth.signInWithPassword({email:await accountEmail(id),password:pw});
         if(error) throw error;
         if(document.getElementById('rememberId').checked) localStorage.setItem('remembered_account_id',id);
         else localStorage.removeItem('remembered_account_id');
