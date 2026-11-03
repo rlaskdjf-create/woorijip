@@ -754,11 +754,24 @@
     const AUTH_STORAGE_KEY = 'sb-aysfzfhixtzuwehvszyo-auth-token';
     const AUTO_LOGIN_FLAG = 'gagyeboo_auto_login_enabled';
     const authStorage = {
-      getItem(key) { return (localStorage.getItem(AUTO_LOGIN_FLAG) === '1' ? localStorage : sessionStorage).getItem(key); },
-      setItem(key, value) { (localStorage.getItem(AUTO_LOGIN_FLAG) === '1' ? localStorage : sessionStorage).setItem(key, value); },
-      removeItem(key) { localStorage.removeItem(key); sessionStorage.removeItem(key); }
+      // Supabase Auth의 Storage 인터페이스는 Promise 기반으로 구현합니다.
+      async getItem(key) {
+        const store = localStorage.getItem(AUTO_LOGIN_FLAG) === '1' ? localStorage : sessionStorage;
+        return store.getItem(key);
+      },
+      async setItem(key, value) {
+        const keep = localStorage.getItem(AUTO_LOGIN_FLAG) === '1';
+        const target = keep ? localStorage : sessionStorage;
+        const other = keep ? sessionStorage : localStorage;
+        other.removeItem(key);
+        target.setItem(key, value);
+      },
+      async removeItem(key) {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+      }
     };
-    // 과거 버전에서 자동 저장된 세션은 사용하지 않도록 정리합니다.
+    // 이전 버전의 장기 저장 세션은 자동로그인 선택이 없으면 사용하지 않습니다.
     if (localStorage.getItem(AUTO_LOGIN_FLAG) !== '1') localStorage.removeItem(AUTH_STORAGE_KEY);
     window.sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { storage: authStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
