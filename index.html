@@ -17,7 +17,6 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='115' fill='%236366f1'/><path d='M256 120 L120 226 L114 366 L398 366 L398 226 Z' fill='%23ffffff'/></svg>">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -799,9 +798,17 @@
       try {
         const {data,error}=await window.sbClient.auth.signUp({email:accountEmail(id),password:pw,options:{data:{username:id}}});
         if(error) throw error;
-        if(!data.session){alert('가입은 완료됐지만 세션이 없습니다. Supabase의 Confirm email 설정을 확인해주세요.');return;}
-        currentAccount=id; localStorage.setItem('gagyeboo_account_name',id);
-        await loadAccountData(id); alert('가계부 개설 완료!');
+        // 회원가입 직후 발급된 세션을 종료해 자동 로그인되지 않도록 처리
+        if(data.session){
+          const {error:signOutError}=await window.sbClient.auth.signOut();
+          if(signOutError) throw signOutError;
+        }
+        currentAccount=null;
+        localStorage.removeItem('gagyeboo_account_name');
+        document.getElementById('loginId').value=id;
+        document.getElementById('loginPw').value='';
+        switchAuthTab('login');
+        alert('회원가입이 완료되었습니다. 아이디와 비밀번호로 로그인해주세요.');
       } catch(err){alert(`가계부 개설에 실패했습니다: ${err.message}`);}
     }
     async function handleLogin(e) {
