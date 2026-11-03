@@ -364,74 +364,13 @@
 .dark #tabContentDashboard .text-slate-400 { color:#b5c4df !important; }
 @media(max-width:520px) {
   #tabContentDashboard { gap:14px !important; }
+  .dark #periodComparisons { grid-template-columns:minmax(0,1fr) !important; }
   #tabContentDashboard > div { padding:13px !important; border-radius:19px !important; }
   .dark #periodComparisons { gap:9px !important; }
   .dark #periodComparisons > .rounded-xl:not(:first-child) { padding:10px 7px !important; }
   .dark #periodComparisons > .rounded-xl:not(:first-child) .space-y-2\.5 { grid-template-columns:1fr; gap:7px; }
   .dark #periodComparisons > .rounded-xl:not(:first-child) .space-y-2\.5 > div { flex-direction:row; justify-content:space-between; border-right:0; border-bottom:1px solid #405474; padding:4px 0 7px; text-align:left; }
   .dark #periodComparisons > .rounded-xl:not(:first-child) .space-y-2\.5 > div:last-child { border-bottom:0; }
-}
-</style>
-
-
-<style id="responsive-dashboard-final-fix">
-/* 데스크톱: 참고 이미지처럼 넓은 대시보드 캔버스 사용 */
-@media (min-width: 768px) {
-  #mainAppView > main { max-width: 1200px !important; padding-left: 28px !important; padding-right: 28px !important; }
-  #mainAppView > header { padding-left: max(28px, calc((100vw - 1200px)/2)) !important; padding-right: max(28px, calc((100vw - 1200px)/2)) !important; }
-  #tabContentDashboard { gap: 18px !important; }
-  #tabContentDashboard > div { padding: 22px !important; border-radius: 24px !important; }
-}
-/* 모바일: 좁은 화면에서 비교 카드 두 개가 반쪽 너비로 찌그러지는 현상 방지 */
-@media (max-width: 600px) {
-  #mainAppView > main { width:100% !important; max-width:100% !important; padding:14px 12px 80px !important; }
-  #mainAppView > header { padding:10px 12px !important; gap:8px !important; }
-  #mainAppView > header > div:first-child { min-width:0 !important; gap:8px !important; }
-  #appHeaderTitle { font-size:clamp(15px,4.2vw,19px) !important; white-space:nowrap; }
-  #mainAppView > header > div:last-child { flex:0 0 auto; gap:6px !important; }
-  #themeToggle { padding:8px 10px !important; gap:6px !important; }
-  #mainAppView > header button[onclick="handleLogout()"] { padding:8px 9px !important; font-size:11px !important; white-space:nowrap; }
-  #tabBtnDashboard, #tabBtnList, #tabBtnStats, #tabBtnEdit { font-size:clamp(11px,3.25vw,14px) !important; padding:11px 2px !important; white-space:nowrap !important; }
-  #tabContentDashboard { display:flex !important; flex-direction:column !important; gap:13px !important; min-width:0 !important; }
-  #tabContentDashboard > div { width:100% !important; min-width:0 !important; padding:13px !important; border-radius:18px !important; }
-  /* 요약: 이번 달/전달/누적 평균 카드 모두 전체 너비로 차례대로 */
-  #periodComparisons { display:flex !important; flex-direction:column !important; gap:10px !important; width:100% !important; min-width:0 !important; }
-  #periodComparisons > .rounded-xl { width:100% !important; min-width:0 !important; max-width:100% !important; box-sizing:border-box !important; padding:12px !important; border-radius:16px !important; }
-  #periodComparisons > .rounded-xl > div:first-child { font-size:15px !important; line-height:1.35 !important; margin-bottom:9px !important; }
-  /* 수입/지출/저축 3개 지표는 모바일에서도 가로형으로 유지 */
-  #periodComparisons > .rounded-xl .grid { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:6px !important; width:100% !important; }
-  #periodComparisons > .rounded-xl .grid > div { min-width:0 !important; padding:9px 4px !important; border-radius:12px !important; }
-  #periodComparisons > .rounded-xl .grid > div > div:first-child { gap:4px !important; margin-bottom:7px !important; }
-  #periodComparisons > .rounded-xl .grid > div i { font-size:14px !important; }
-  #periodComparisons > .rounded-xl .grid > div span { font-size:11px !important; }
-  #periodComparisons .summary-amount { display:block !important; max-width:100% !important; font-size:clamp(10px,2.8vw,14px) !important; line-height:1.25 !important; white-space:normal !important; overflow-wrap:anywhere !important; word-break:normal !important; }
-  #periodComparisons > .rounded-xl:not(:first-child) .grid > div { display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:flex-start !important; text-align:center !important; border-right:0 !important; border-bottom:0 !important; gap:5px !important; }
-  #periodComparisons > .rounded-xl:not(:first-child) .grid > div > div:last-child { width:100%; min-width:0; }
-  #periodComparisons > .rounded-xl:not(:first-child) .grid > div > div:last-child > span { white-space:normal !important; font-size:10px !important; }
-  /* 고정 내역: 항목명/금액 한 줄 정렬, 작은 화면에서도 금액 고정 */
-  #fixedMonthlyBreakdown > div > div > button { display:flex !important; align-items:center !important; gap:7px !important; padding:11px 2px !important; }
-  #fixedMonthlyBreakdown button > span:first-child { flex:1 1 auto !important; min-width:0 !important; gap:6px !important; }
-  #fixedMonthlyBreakdown button > span:first-child > span:last-child { min-width:0 !important; font-size:13px !important; line-height:1.3 !important; overflow-wrap:anywhere !important; word-break:keep-all !important; }
-  #fixedMonthlyBreakdown button > span:last-child { flex:0 0 auto !important; gap:4px !important; white-space:nowrap !important; }
-  #fixedMonthlyBreakdown button > span:last-child > span { font-size:12px !important; white-space:nowrap !important; }
-  #fixedMonthlyBreakdown button > span:last-child > i { font-size:11px !important; }
-  #fixedMonthlyBreakdown .bg-slate-50\/70 > div { display:flex !important; align-items:center !important; gap:8px !important; padding:8px 7px !important; }
-  #fixedMonthlyBreakdown .bg-slate-50\/70 > div > div:first-child { flex:1 1 auto !important; min-width:0 !important; font-size:11px !important; }
-  #fixedMonthlyBreakdown .bg-slate-50\/70 > div > div:last-child { flex:0 0 auto !important; font-size:11px !important; white-space:nowrap !important; }
-  /* 월별 그래프와 범례 */
-  #tabContentDashboard > div:has(#monthlyTrendChart) > div:first-child { align-items:flex-start !important; flex-wrap:wrap !important; gap:8px !important; }
-  #tabContentDashboard > div:has(#monthlyTrendChart) > div:first-child > div { gap:9px !important; flex-wrap:wrap !important; }
-  #monthlyTrendChart { min-height:130px !important; }
-  #monthlyTrendChart svg { width:100% !important; height:auto !important; }
-}
-@media (max-width:360px) {
-  #appHeaderTitle { font-size:14px !important; }
-  #themeToggle { padding:7px 8px !important; }
-  #mainAppView > header button[onclick="handleLogout()"] { font-size:10px !important; padding:7px !important; }
-  #periodComparisons > .rounded-xl .grid { gap:4px !important; }
-  #periodComparisons > .rounded-xl .grid > div { padding-left:2px !important; padding-right:2px !important; }
-  #periodComparisons .summary-amount { font-size:10px !important; }
-  #fixedMonthlyBreakdown button > span:last-child > span { font-size:11px !important; }
 }
 </style>
 
