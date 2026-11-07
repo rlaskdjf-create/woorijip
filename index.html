@@ -687,6 +687,7 @@
     <div class="bg-white dark:bg-slate-800 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-4 max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between"><h3 id="dashboardAmountDetailTitle" class="text-lg font-bold">이번 달 상세 내역</h3><button type="button" onclick="closeModal('modalDashboardAmountDetails')" class="text-slate-400"><i class="fa-solid fa-xmark text-xl"></i></button></div>
       <div id="dashboardMonthTotalBreakdown" class="rounded-xl bg-slate-50 dark:bg-slate-700/40 p-3 space-y-2"></div>
+      <div id="dashboardExpenseAnalysis" class="space-y-3 hidden"></div>
       <div id="dashboardAmountDetailList" class="space-y-2"></div>
       <div class="border-t border-slate-200 dark:border-slate-700 pt-3 flex justify-between font-bold"><span>합계</span><span id="dashboardAmountDetailTotal">0원</span></div>
     </div>
@@ -976,15 +977,16 @@
     }
 
     window.expenseAnalysisExpanded = window.expenseAnalysisExpanded || {};
-    function toggleExpenseAnalysisCategory(category) {
+    function toggleExpenseAnalysisCategory(category, hostId = 'listExpenseAnalysis') {
       window.expenseAnalysisExpanded[category] = !window.expenseAnalysisExpanded[category];
       const monthTransactions = state.transactions.filter(t => monthKey(t.date) === (state.selectedMonth || currentMonthKey()) && isTransactionVisible(t));
-      const memberTransactions = state.selectedListMemberFilter === 'ALL' ? monthTransactions : monthTransactions.filter(t => t.person === state.selectedListMemberFilter);
-      renderListExpenseAnalysis(memberTransactions);
+      const memberFilter = hostId === 'dashboardExpenseAnalysis' ? state.selectedMemberFilter : state.selectedListMemberFilter;
+      const memberTransactions = memberFilter === 'ALL' ? monthTransactions : monthTransactions.filter(t => t.person === memberFilter);
+      renderListExpenseAnalysis(memberTransactions, hostId);
     }
 
-    function renderListExpenseAnalysis(transactions) {
-      const host = document.getElementById('listExpenseAnalysis');
+    function renderListExpenseAnalysis(transactions, hostId = 'listExpenseAnalysis') {
+      const host = document.getElementById(hostId);
       if (!host) return;
       const expenses = transactions.filter(t => t.type === '지출');
       const totalExpense = expenses.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
@@ -1005,14 +1007,14 @@
         return;
       }
       const won = n => `${Math.round(n).toLocaleString('ko-KR')}원`;
-      host.innerHTML = `<div class="flex items-end justify-between gap-2"><div><div class="font-bold text-sm">지출 분석</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1">세부항목별 지출과 각 항목의 실제 지출 내용을 큰 금액순으로 확인합니다.</div></div><div class="text-right shrink-0"><div class="text-[11px] text-slate-500 dark:text-slate-400">총 지출</div><div class="text-lg font-extrabold text-rose-600 dark:text-rose-300 tabular-nums">${won(totalExpense)}</div></div></div><div class="space-y-2">${categories.map((group,index) => {
+      host.innerHTML = `${hostId === 'dashboardExpenseAnalysis' ? '<div class="font-bold text-sm">지출 세부 분석</div><p class="text-xs text-slate-500 dark:text-slate-400">세부항목별 합계와 각 항목 안의 지출 내용을 큰 금액순으로 보여줍니다. 항목을 누르면 내용별 목록을 펼칠 수 있습니다.</p>' : ''}<div class="flex items-end justify-between gap-2"><div><div class="font-bold text-sm">지출 분석</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1">세부항목별 지출과 각 항목의 실제 지출 내용을 큰 금액순으로 확인합니다.</div></div><div class="text-right shrink-0"><div class="text-[11px] text-slate-500 dark:text-slate-400">총 지출</div><div class="text-lg font-extrabold text-rose-600 dark:text-rose-300 tabular-nums">${won(totalExpense)}</div></div></div><div class="space-y-2">${categories.map((group,index) => {
         const descriptions = [...group.descriptions.entries()].map(([name,amount]) => ({name,amount})).sort((a,b) => b.amount-a.amount || a.name.localeCompare(b.name,'ko'));
         const expanded = Boolean(window.expenseAnalysisExpanded[group.name]);
         const shown = expanded ? descriptions : descriptions.slice(0,3);
         const share = totalExpense ? (group.total/totalExpense*100) : 0;
         const top = descriptions[0];
         const categoryKey = encodeURIComponent(group.name).replace(/'/g, '%27');
-        return `<section class="rounded-xl border border-slate-200 dark:border-slate-700 p-3 space-y-2"><button type="button" onclick="toggleExpenseAnalysisCategory(decodeURIComponent('${categoryKey}'))" class="w-full text-left"><div class="flex items-center justify-between gap-2"><span class="font-bold text-sm min-w-0">${index+1}. ${escapeHtml(group.name)}</span><span class="font-extrabold text-sm text-rose-600 dark:text-rose-300 whitespace-nowrap tabular-nums">${won(group.total)}</span></div><div class="mt-2 h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden"><div class="h-full rounded-full bg-rose-500" style="width:${Math.min(100,share)}%"></div></div><div class="flex justify-between items-center mt-1"><span class="text-[11px] text-slate-500 dark:text-slate-400">전체 지출의 ${share.toFixed(1)}% · ${group.count}건</span><span class="text-[11px] text-indigo-600 dark:text-indigo-300">${expanded ? '접기' : `내용별 보기 (${descriptions.length}개)`}</span></div></button><div class="border-t border-slate-100 dark:border-slate-700 pt-2 space-y-1">${shown.map((item,i) => `<div class="flex items-center justify-between gap-2 text-xs"><span class="min-w-0 ${i===0?'font-bold text-slate-800 dark:text-slate-100':'text-slate-600 dark:text-slate-300'}">${i===0?'★ ':''}${escapeHtml(item.name)}</span><span class="shrink-0 font-semibold tabular-nums ${i===0?'text-rose-600 dark:text-rose-300':'text-slate-700 dark:text-slate-200'}">${won(item.amount)}</span></div>`).join('')}</div>${top ? `<div class="text-[10px] text-slate-400">최다 지출 내용: ${escapeHtml(top.name)} · ${won(top.amount)}</div>` : ''}</section>`;
+        return `<section class="rounded-xl border border-slate-200 dark:border-slate-700 p-3 space-y-2"><button type="button" onclick="toggleExpenseAnalysisCategory(decodeURIComponent('${categoryKey}'),'${hostId}')" class="w-full text-left"><div class="flex items-center justify-between gap-2"><span class="font-bold text-sm min-w-0">${index+1}. ${escapeHtml(group.name)}</span><span class="font-extrabold text-sm text-rose-600 dark:text-rose-300 whitespace-nowrap tabular-nums">${won(group.total)}</span></div><div class="mt-2 h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden"><div class="h-full rounded-full bg-rose-500" style="width:${Math.min(100,share)}%"></div></div><div class="flex justify-between items-center mt-1"><span class="text-[11px] text-slate-500 dark:text-slate-400">전체 지출의 ${share.toFixed(1)}% · ${group.count}건</span><span class="text-[11px] text-indigo-600 dark:text-indigo-300">${expanded ? '접기' : `내용별 보기 (${descriptions.length}개)`}</span></div></button><div class="border-t border-slate-100 dark:border-slate-700 pt-2 space-y-1">${shown.map((item,i) => `<div class="flex items-center justify-between gap-2 text-xs"><span class="min-w-0 ${i===0?'font-bold text-slate-800 dark:text-slate-100':'text-slate-600 dark:text-slate-300'}">${i===0?'★ ':''}${escapeHtml(item.name)}</span><span class="shrink-0 font-semibold tabular-nums ${i===0?'text-rose-600 dark:text-rose-300':'text-slate-700 dark:text-slate-200'}">${won(item.amount)}</span></div>`).join('')}</div>${top ? `<div class="text-[10px] text-slate-400">최다 지출 내용: ${escapeHtml(top.name)} · ${won(top.amount)}</div>` : ''}</section>`;
       }).join('')}</div>`;
     }
 
@@ -1871,6 +1873,14 @@
         <div class="flex justify-between text-xs"><span class="text-emerald-600 dark:text-emerald-300">수입</span><b>${monthTotals['수입'].toLocaleString('ko-KR')}원</b></div>
         <div class="flex justify-between text-xs"><span class="text-rose-600 dark:text-rose-300">지출</span><b>${monthTotals['지출'].toLocaleString('ko-KR')}원</b></div>
         <div class="flex justify-between text-xs"><span class="text-indigo-600 dark:text-indigo-300">저축</span><b>${monthTotals['저축'].toLocaleString('ko-KR')}원</b></div>`;
+      const expenseAnalysisHost = document.getElementById('dashboardExpenseAnalysis');
+      if (type === '지출') {
+        expenseAnalysisHost.classList.remove('hidden');
+        renderListExpenseAnalysis(monthItems.filter(t => t.type === '지출'), 'dashboardExpenseAnalysis');
+      } else {
+        expenseAnalysisHost.classList.add('hidden');
+        expenseAnalysisHost.innerHTML = '';
+      }
       if (!items.length) {
         host.innerHTML = '<p class="py-6 text-center text-sm text-slate-400">해당 내역이 없습니다.</p>';
       } else {
