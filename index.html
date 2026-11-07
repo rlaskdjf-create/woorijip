@@ -507,7 +507,7 @@
         </div>
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm space-y-3">
           <div class="flex items-center justify-between gap-3"><h3 class="text-base sm:text-lg font-bold">이번 달 고정 내역</h3><button type="button" onclick="openFixedMonthlyDetails('ALL')" class="text-sm font-bold text-indigo-600 dark:text-indigo-300 whitespace-nowrap">전체 보기 <i class="fa-solid fa-chevron-right ml-1 text-xs"></i></button></div>
-          <div class="text-[11px] text-slate-400 -mt-2">금액이 큰 순서로 상위 5개 표시 · 금액을 누르면 구성원별 상세 내역</div>
+          <div class="text-[11px] text-slate-400 -mt-2">수입 제외 · 금액이 큰 순서로 상위 5개 표시 · 금액을 누르면 구성원별 상세 내역</div>
           <div id="fixedMonthlyGrandTotal" class="hidden">0원</div>
           <div id="fixedMonthlyBreakdown" class="space-y-0"></div>
         </div>
@@ -537,6 +537,17 @@
               <i class="fa-solid fa-plus"></i> 내역 추가
             </button>
           </div>
+        </div>
+        <div id="listTotalSummary" class="rounded-2xl border border-slate-200/70 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 p-4 space-y-3">
+          <div class="flex items-center justify-between gap-2"><div class="font-bold">선택 월 총 합계</div><div id="listTotalMonthLabel" class="text-xs text-slate-500 dark:text-slate-400"></div></div>
+          <div class="text-xl font-extrabold tabular-nums" id="listGrandTotal">0원</div>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="rounded-xl bg-emerald-50 dark:bg-emerald-950/30 p-2"><div class="text-xs font-semibold text-emerald-600 dark:text-emerald-300">수입</div><div id="listIncomeTotal" class="mt-1 text-sm font-bold text-emerald-700 dark:text-emerald-300">0원</div></div>
+            <div class="rounded-xl bg-rose-50 dark:bg-rose-950/30 p-2"><div class="text-xs font-semibold text-rose-600 dark:text-rose-300">지출</div><div id="listExpenseTotal" class="mt-1 text-sm font-bold text-rose-700 dark:text-rose-300">0원</div></div>
+            <div class="rounded-xl bg-indigo-50 dark:bg-indigo-950/30 p-2"><div class="text-xs font-semibold text-indigo-600 dark:text-indigo-300">저축</div><div id="listSavingTotal" class="mt-1 text-sm font-bold text-indigo-700 dark:text-indigo-300">0원</div></div>
+          </div>
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">항목별 조회</div>
+          <div id="txTypeFilter" class="flex flex-wrap gap-2" aria-label="내역 항목 필터"></div>
         </div>
         <div id="txMemberFilter" class="flex flex-wrap gap-2" aria-label="내역 구성원 필터"></div>
         <div id="txList" class="space-y-3"></div>
@@ -681,13 +692,26 @@
     </div>
   </div>
 
+  <!-- 대시보드 요약 금액 상세 -->
+  <div id="modalDashboardAmountDetails" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between"><h3 id="dashboardAmountDetailTitle" class="text-lg font-bold">이번 달 상세 내역</h3><button type="button" onclick="closeModal('modalDashboardAmountDetails')" class="text-slate-400"><i class="fa-solid fa-xmark text-xl"></i></button></div>
+      <div id="dashboardAmountDetailList" class="space-y-2"></div>
+      <div class="border-t border-slate-200 dark:border-slate-700 pt-3 flex justify-between font-bold"><span>합계</span><span id="dashboardAmountDetailTotal">0원</span></div>
+    </div>
+  </div>
+
   <!-- 이번 달 고정 내역 상세 -->
   <div id="modalFixedMonthlyDetails" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white dark:bg-slate-800 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-4 max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between"><h3 id="fixedMonthlyDetailTitle" class="text-lg font-bold">고정 내역 상세</h3><button type="button" onclick="closeModal('modalFixedMonthlyDetails')" class="text-slate-400"><i class="fa-solid fa-xmark text-xl"></i></button></div>
       <div id="fixedMonthlyDetailMemberFilter" class="flex flex-wrap gap-2" aria-label="고정 내역 구성원 필터"></div>
       <div id="fixedMonthlyDetailList" class="space-y-3"></div>
-      <div class="border-t border-slate-200 dark:border-slate-700 pt-3 flex justify-between font-bold"><span>합계</span><span id="fixedMonthlyDetailTotal">0원</span></div>
+      <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2 text-sm font-bold">
+        <div class="flex justify-between text-rose-600 dark:text-rose-300"><span>지출 합계</span><span id="fixedMonthlyExpenseTotal">0원</span></div>
+        <div class="flex justify-between text-indigo-600 dark:text-indigo-300"><span>저축 합계</span><span id="fixedMonthlySavingTotal">0원</span></div>
+        <div class="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-2"><span>총 합계</span><span id="fixedMonthlyDetailTotal">0원</span></div>
+      </div>
     </div>
   </div>
 
@@ -933,6 +957,37 @@
       state.selectedListMemberFilter = member;
       renderListMemberFilter();
       renderUI();
+    }
+
+    window.selectedListTypeFilter = window.selectedListTypeFilter || 'ALL';
+    function renderListTypeFilter() {
+      const container = document.getElementById('txTypeFilter');
+      if (!container) return;
+      const options = ['ALL', '수입', '지출', '저축'];
+      container.innerHTML = options.map(type => {
+        const selected = window.selectedListTypeFilter === type;
+        const label = type === 'ALL' ? '전체 항목' : type;
+        return `<button type="button" onclick="setListTypeFilter('${type}')" class="px-3 py-1.5 rounded-full text-xs font-semibold ${selected ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'}">${label}</button>`;
+      }).join('');
+    }
+    function setListTypeFilter(type) {
+      window.selectedListTypeFilter = ['ALL','수입','지출','저축'].includes(type) ? type : 'ALL';
+      renderUI();
+    }
+    function renderListTotalSummary(transactions) {
+      const selected = state.selectedMonth || currentMonthKey();
+      const [year, month] = selected.split('-').map(Number);
+      const totals = { '수입': 0, '지출': 0, '저축': 0 };
+      transactions.forEach(t => { if (Object.prototype.hasOwnProperty.call(totals, t.type)) totals[t.type] += Number(t.amount) || 0; });
+      const selectedType = window.selectedListTypeFilter || 'ALL';
+      const total = selectedType === 'ALL' ? totals['수입'] + totals['지출'] + totals['저축'] : totals[selectedType];
+      document.getElementById('listTotalMonthLabel').textContent = `${year}년 ${month}월 기준`;
+      document.getElementById('listGrandTotal').textContent = total.toLocaleString('ko-KR') + '원';
+      document.querySelector('#listTotalSummary > div:first-child > div:first-child').textContent = selectedType === 'ALL' ? '선택 월 총 합계' : `선택 월 ${selectedType} 합계`;
+      document.getElementById('listIncomeTotal').textContent = totals['수입'].toLocaleString('ko-KR') + '원';
+      document.getElementById('listExpenseTotal').textContent = totals['지출'].toLocaleString('ko-KR') + '원';
+      document.getElementById('listSavingTotal').textContent = totals['저축'].toLocaleString('ko-KR') + '원';
+      renderListTypeFilter();
     }
 
     function setFilter(m) {
@@ -1538,8 +1593,9 @@
         if (value >= 10000) return `${sign}${(value / 10000).toFixed(1).replace(/\.0$/, '')}만 원`;
         return `${sign}${fmt(n)}`;
       };
-      const amountButton = (n, color, signed = false) => {
+      const amountButton = (n, color, signed = false, detailType = '') => {
         const exact = signed ? signedFmt(n) : fmt(n);
+        if (detailType) return `<button type="button" onclick="openDashboardAmountDetails('${detailType}')" class="summary-amount ${color} font-bold text-right tabular-nums whitespace-nowrap leading-tight underline-offset-2 active:underline" aria-label="${detailType} 상세 내역 보기">${exact}</button>`;
         return `<span class="summary-amount ${color} font-bold text-right tabular-nums whitespace-nowrap leading-tight">${exact}</span>`;
       };
       const amountRows = data => {
@@ -1548,7 +1604,7 @@
           ['지출', data.exp, 'text-rose-600 dark:text-rose-400', 'fa-credit-card', 'bg-rose-100 dark:bg-rose-900/30'],
           ['저축', data.sav, 'text-indigo-600 dark:text-indigo-400', 'fa-piggy-bank', 'bg-indigo-100 dark:bg-indigo-900/30']
         ];
-        return `<div class="grid grid-cols-3 gap-2 sm:gap-3">${rows.map(([name,value,color,icon,bg]) => `<div class="min-w-0 rounded-xl ${bg} p-2.5 sm:p-3 text-center"><div class="flex items-center justify-center gap-1.5 mb-2"><i class="fa-solid ${icon} ${color} text-base sm:text-lg" aria-hidden="true"></i><span class="${color} font-semibold text-xs sm:text-sm">${name}</span></div><div class="flex justify-center">${amountButton(value,color)}</div></div>`).join('')}</div>`;
+        return `<div class="grid grid-cols-3 gap-2 sm:gap-3">${rows.map(([name,value,color,icon,bg]) => `<div class="min-w-0 rounded-xl ${bg} p-2.5 sm:p-3 text-center"><div class="flex items-center justify-center gap-1.5 mb-2"><i class="fa-solid ${icon} ${color} text-base sm:text-lg" aria-hidden="true"></i><span class="${color} font-semibold text-xs sm:text-sm">${name}</span></div><div class="flex justify-center">${amountButton(value,color,false,name)}</div></div>`).join('')}</div>`;
       };
       const comparisonRows = (base, now) => {
         const rows = [['수입',base.inc,now.inc,'text-emerald-600 dark:text-emerald-400','fa-wallet','bg-emerald-100 dark:bg-emerald-900/30'],['지출',base.exp,now.exp,'text-rose-600 dark:text-rose-400','fa-credit-card','bg-rose-100 dark:bg-rose-900/30'],['저축',base.sav,now.sav,'text-indigo-600 dark:text-indigo-400','fa-piggy-bank','bg-indigo-100 dark:bg-indigo-900/30']];
@@ -1586,6 +1642,10 @@
       let listTransactions = state.transactions.filter(t => monthKey(t.date) === state.selectedMonth && isTransactionVisible(t));
       if (state.selectedListMemberFilter !== 'ALL') {
         listTransactions = listTransactions.filter(t => t.person === state.selectedListMemberFilter);
+      }
+      renderListTotalSummary(listTransactions);
+      if (window.selectedListTypeFilter && window.selectedListTypeFilter !== 'ALL') {
+        listTransactions = listTransactions.filter(t => t.type === window.selectedListTypeFilter);
       }
       // 날짜 내림차순 정렬: 최신 날짜가 위, 같은 날짜는 기존 등록 순서를 유지합니다.
       listTransactions.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
@@ -1657,7 +1717,7 @@
       };
       const active = window.activeFixedMonthlyBreakdown || '';
       const getContent = item => String(item.desc || item.name || item.subcategory || '고정 내역').trim();
-      const allItems = ['수입', '지출', '저축'].flatMap(type =>
+      const allItems = ['지출', '저축'].flatMap(type =>
         getCurrentMonthFixedItems(type).map(item => ({ ...item, type }))
       );
       const grandTotal = allItems.reduce((sum, item) => sum + (Number(item.displayAmount) || 0), 0);
@@ -1720,7 +1780,7 @@
 
     function renderFixedMonthlyDetailsList() {
       const type = state.activeFixedDetailType || '지출';
-      const types = type === 'ALL' ? ['수입', '지출', '저축'] : [type];
+      const types = type === 'ALL' ? ['지출', '저축'] : [type];
       const items = types.flatMap(itemType => getCurrentMonthFixedItems(itemType).map(item => ({ ...item, type: itemType })))
         .filter(item => state.selectedFixedDetailMemberFilter === 'ALL' || item.person === state.selectedFixedDetailMemberFilter);
       const colors = { '수입': 'text-emerald-600 dark:text-emerald-300', '지출': 'text-rose-600 dark:text-rose-300', '저축': 'text-indigo-600 dark:text-indigo-300' };
@@ -1748,18 +1808,40 @@
           return `<section class="rounded-xl border border-slate-200 dark:border-slate-700 p-3 space-y-2"><div class="fixed-detail-group-heading"><div class="min-w-0 flex items-center gap-2"><span class="text-[10px] font-bold ${colors[group.type]}">${group.type}</span><div class="fixed-detail-group-name">${escapeHtml(group.content)}</div></div><div class="fixed-detail-group-total ${colors[group.type]}">총 ${Number(group.total).toLocaleString('ko-KR')}원</div></div><div class="space-y-1">${rows}</div></section>`;
         }).join('');
       }
-      const detailTotal = items.reduce((sum, item) => sum + (Number(item.displayAmount) || 0), 0);
-      document.getElementById('fixedMonthlyDetailTotal').textContent = Number(detailTotal).toLocaleString('ko-KR') + '원';
+      const expenseTotal = items.filter(item => item.type === '지출').reduce((sum, item) => sum + (Number(item.displayAmount) || 0), 0);
+      const savingTotal = items.filter(item => item.type === '저축').reduce((sum, item) => sum + (Number(item.displayAmount) || 0), 0);
+      const detailTotal = expenseTotal + savingTotal;
+      document.getElementById('fixedMonthlyExpenseTotal').textContent = expenseTotal.toLocaleString('ko-KR') + '원';
+      document.getElementById('fixedMonthlySavingTotal').textContent = savingTotal.toLocaleString('ko-KR') + '원';
+      document.getElementById('fixedMonthlyDetailTotal').textContent = detailTotal.toLocaleString('ko-KR') + '원';
     }
 
     function openFixedMonthlyDetails(type) {
       state.activeFixedDetailType = type;
       state.selectedFixedDetailMemberFilter = 'ALL';
       const [detailYear, detailMonth] = (state.selectedMonth || currentMonthKey()).split('-');
-      document.getElementById('fixedMonthlyDetailTitle').textContent = type === 'ALL' ? `${String(detailYear).slice(-2)}.${String(detailMonth).padStart(2, '0')} 고정 내역 전체 보기` : `${String(detailYear).slice(-2)}.${String(detailMonth).padStart(2, '0')} 고정 ${type} 내역`;
+      document.getElementById('fixedMonthlyDetailTitle').textContent = type === 'ALL' ? `${String(detailYear).slice(-2)}.${String(detailMonth).padStart(2, '0')} 고정 지출·저축 전체 보기` : `${String(detailYear).slice(-2)}.${String(detailMonth).padStart(2, '0')} 고정 ${type} 내역`;
       renderFixedMonthlyDetailMemberFilter();
       renderFixedMonthlyDetailsList();
       openModal('modalFixedMonthlyDetails');
+    }
+
+    function openDashboardAmountDetails(type) {
+      const selected = state.selectedMonth || currentMonthKey();
+      const [year, month] = selected.split('-').map(Number);
+      const names = { '수입': '수입', '지출': '지출', '저축': '저축' };
+      const colors = { '수입': 'text-emerald-600 dark:text-emerald-300', '지출': 'text-rose-600 dark:text-rose-300', '저축': 'text-indigo-600 dark:text-indigo-300' };
+      const items = state.transactions.filter(t => monthKey(t.date) === selected && t.type === type && isTransactionVisible(t) && (state.selectedMemberFilter === 'ALL' || t.person === state.selectedMemberFilter)).sort((a,b) => String(a.date || '').localeCompare(String(b.date || '')));
+      const host = document.getElementById('dashboardAmountDetailList');
+      document.getElementById('dashboardAmountDetailTitle').textContent = `${year}년 ${month}월 ${names[type] || ''} 상세 내역`;
+      if (!items.length) {
+        host.innerHTML = '<p class="py-6 text-center text-sm text-slate-400">해당 내역이 없습니다.</p>';
+      } else {
+        host.innerHTML = items.map(item => `<div class="flex items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 p-3"><div class="min-w-0"><div class="text-xs text-slate-400">${escapeHtml(item.date || '')} · ${escapeHtml(item.person || '공통')}</div><div class="font-semibold text-sm truncate">${escapeHtml(item.subcategory || '')}${item.desc ? ` · ${escapeHtml(item.desc)}` : ''}</div></div><div class="shrink-0 font-bold text-sm ${colors[type]}">${Number(item.amount || 0).toLocaleString('ko-KR')}원</div></div>`).join('');
+      }
+      const total = items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+      document.getElementById('dashboardAmountDetailTotal').textContent = total.toLocaleString('ko-KR') + '원';
+      openModal('modalDashboardAmountDetails');
     }
 
     function renderDashboard(inc, exp, sav) {
