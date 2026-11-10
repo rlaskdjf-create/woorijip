@@ -533,7 +533,6 @@
           <div class="flex items-center justify-between gap-2"><div class="font-bold">거래 내역 합계</div><div id="listTotalMonthLabel" class="text-xs text-slate-500 dark:text-slate-400"></div></div>
           <div id="listSummaryTypeSelector" class="grid grid-cols-3 gap-2" aria-label="합계 유형 선택"></div>
           <div id="listGrandTotal" class="w-full"></div>
-          <div id="listSummaryMemberBreakdown" class="hidden border-t border-slate-200 dark:border-slate-600 pt-2 space-y-2"></div>
         </div>
         <div id="txMemberFilter" class="flex flex-wrap gap-2" aria-label="내역 구성원 필터"></div>
         <div id="txList" class="space-y-3"></div>
@@ -968,16 +967,9 @@
       renderUI();
     }
     window.listSummarySelectedType = window.listSummarySelectedType || '합계';
-    window.listSummaryExpanded = window.listSummaryExpanded || false;
 
     function setListSummaryType(type) {
       window.listSummarySelectedType = ['합계', '지출', '저축'].includes(type) ? type : '합계';
-      window.listSummaryExpanded = false;
-      renderUI();
-    }
-
-    function toggleListSummaryMembers() {
-      window.listSummaryExpanded = !window.listSummaryExpanded;
       renderUI();
     }
 
@@ -985,21 +977,14 @@
       const selected = state.selectedMonth || currentMonthKey();
       const [year, month] = selected.split('-').map(Number);
       const totals = { '지출': 0, '저축': 0 };
-      const memberTotals = { '합계': new Map(), '지출': new Map(), '저축': new Map() };
 
       transactions.forEach(t => {
         if (!['지출', '저축'].includes(t.type)) return;
-        const amount = Number(t.amount) || 0;
-        totals[t.type] += amount;
-        const member = String(t.person || '구성원 미지정').trim() || '구성원 미지정';
-        memberTotals[t.type].set(member, (memberTotals[t.type].get(member) || 0) + amount);
-        memberTotals['합계'].set(member, (memberTotals['합계'].get(member) || 0) + amount);
+        totals[t.type] += Number(t.amount) || 0;
       });
 
       const selectedType = window.listSummarySelectedType || '합계';
       const total = selectedType === '합계' ? totals['지출'] + totals['저축'] : totals[selectedType];
-      const members = [...memberTotals[selectedType].entries()]
-        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'));
       const won = n => `${Math.round(n).toLocaleString('ko-KR')}원`;
       const color = selectedType === '지출'
         ? 'text-rose-600 dark:text-rose-300'
@@ -1018,18 +1003,8 @@
             : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300'}">${type}</button>`;
       }).join('');
 
-      const totalEl = document.getElementById('listGrandTotal');
-      totalEl.innerHTML = `<button type="button" onclick="toggleListSummaryMembers()"
-        class="w-full flex items-center justify-between gap-3 py-1 text-left">
-          <strong class="text-2xl font-extrabold tabular-nums ${color}">${won(total)}</strong>
-          <span class="shrink-0 text-xs font-semibold text-indigo-600 dark:text-indigo-300">${window.listSummaryExpanded ? '구성원별 접기' : '구성원별 보기'} <i class="fa-solid fa-chevron-${window.listSummaryExpanded ? 'up' : 'down'} ml-1"></i></span>
-        </button>`;
-
-      const breakdown = document.getElementById('listSummaryMemberBreakdown');
-      breakdown.classList.toggle('hidden', !window.listSummaryExpanded);
-      breakdown.innerHTML = members.length
-        ? members.map(([name, amount]) => `<div class="flex justify-between gap-3 text-sm"><span>${escapeHtml(name)}</span><b class="tabular-nums">${won(amount)}</b></div>`).join('')
-        : '<p class="text-xs text-slate-400">해당 내역이 없습니다.</p>';
+      document.getElementById('listGrandTotal').innerHTML =
+        `<div class="w-full py-1 text-left"><strong class="text-2xl font-extrabold tabular-nums ${color}">${won(total)}</strong></div>`;
     }
 
     window.expenseAnalysisExpanded = window.expenseAnalysisExpanded || {};
@@ -1994,6 +1969,19 @@
       host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" class="block w-full" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${grid}${lines}${labels}</svg>`;
     }
 
+    window.statsExpenseCategoryExpanded = window.statsExpenseCategoryExpanded || {};
+    window.statsExpenseDescriptionExpanded = window.statsExpenseDescriptionExpanded || {};
+
+    function toggleStatsExpenseCategory(categoryId) {
+      window.statsExpenseCategoryExpanded[categoryId] = !window.statsExpenseCategoryExpanded[categoryId];
+      renderUI();
+    }
+
+    function toggleStatsExpenseDescription(descriptionId) {
+      window.statsExpenseDescriptionExpanded[descriptionId] = !window.statsExpenseDescriptionExpanded[descriptionId];
+      renderUI();
+    }
+
     function renderStats(list, totalInc, totalExp, totalSav) {
       const balance = totalInc - (totalExp + totalSav);
       const expPct = totalInc > 0 ? Math.round((totalExp / totalInc) * 100) : 0;
@@ -2017,29 +2005,30 @@
       const container = document.getElementById('statsBreakdown');
       const types = ['수입', '지출', '저축'];
       let html = '';
+      const won = n => `${Math.round(Number(n) || 0).toLocaleString('ko-KR')}원`;
 
       types.forEach(type => {
         const typeList = list.filter(t => t.type === type);
-        const typeTotal = typeList.reduce((acc, c) => acc + c.amount, 0);
+        const typeTotal = typeList.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
         if (typeTotal === 0) return;
 
-        const subGroup = {};
+        const subGroup = new Map();
         typeList.forEach(t => {
-          if (!subGroup[t.subcategory]) {
-            subGroup[t.subcategory] = { total: 0, descs: {}, txs: [] };
-          }
-          subGroup[t.subcategory].total += t.amount;
-          subGroup[t.subcategory].txs.push(t);
-
-          if (!subGroup[t.subcategory].descs[t.desc]) {
-            subGroup[t.subcategory].descs[t.desc] = { total: 0, txs: [] };
-          }
-          subGroup[t.subcategory].descs[t.desc].total += t.amount;
-          subGroup[t.subcategory].descs[t.desc].txs.push(t);
+          const sub = String(t.subcategory || '세부항목 미지정').trim() || '세부항목 미지정';
+          const desc = String(t.desc || '내용 미입력').trim() || '내용 미입력';
+          if (!subGroup.has(sub)) subGroup.set(sub, { total: 0, txs: [], descs: new Map() });
+          const group = subGroup.get(sub);
+          const amount = Number(t.amount) || 0;
+          group.total += amount;
+          group.txs.push(t);
+          if (!group.descs.has(desc)) group.descs.set(desc, { total: 0, txs: [] });
+          group.descs.get(desc).total += amount;
+          group.descs.get(desc).txs.push(t);
         });
 
-        const typeColorClass = type === '지출' ? 'text-rose-600' : type === '수입' ? 'text-emerald-600' : 'text-indigo-600';
-        const typeBgClass = type === '지출' ? 'bg-rose-500' : type === '수입' ? 'bg-emerald-500' : 'bg-indigo-500';
+        const isExpense = type === '지출';
+        const typeColorClass = isExpense ? 'text-rose-600' : type === '수입' ? 'text-emerald-600' : 'text-indigo-600';
+        const typeBgClass = isExpense ? 'bg-rose-500' : type === '수입' ? 'bg-emerald-500' : 'bg-indigo-500';
 
         html += `
           <div class="space-y-3">
@@ -2048,50 +2037,90 @@
                 <span class="w-2.5 h-2.5 rounded-full ${typeBgClass}"></span>
                 ${type} 총계
               </span>
-              <span class="font-bold text-base ${typeColorClass}">${typeTotal.toLocaleString()}원</span>
+              <span class="font-bold text-base ${typeColorClass}">${won(typeTotal)}</span>
             </div>
-
             <div class="space-y-3 pl-1">
-              ${Object.keys(subGroup).sort((a, b) => (Number(subGroup[b].total) - Number(subGroup[a].total)) || a.localeCompare(b, 'ko')).map((sub, sIdx) => {
-                const subObj = subGroup[sub];
-                const subPctOfTotal = Math.round((subObj.total / typeTotal) * 100);
-                const subAccordionId = `acc_${type}_sub_${sIdx}`;
+              ${[...subGroup.entries()].sort((a,b) => b[1].total-a[1].total || a[0].localeCompare(b[0], 'ko')).map(([sub, subObj], sIdx) => {
+                const subPct = typeTotal ? Math.round(subObj.total / typeTotal * 100) : 0;
+                const categoryId = `stats_${type}_${sIdx}`;
+                const categoryExpanded = Boolean(window.statsExpenseCategoryExpanded[categoryId]);
+                const descriptionRows = [...subObj.descs.entries()]
+                  .map(([name, data]) => ({ name, total: data.total, txs: data.txs }))
+                  .sort((a,b) => b.total-a.total || a.name.localeCompare(b.name, 'ko'));
+
+                let detailHtml = '';
+                if (isExpense) {
+                  detailHtml = categoryExpanded ? `
+                    <div class="bg-white dark:bg-slate-800/80 p-3 border-t border-slate-200/50 dark:border-slate-700 space-y-2">
+                      <div class="text-xs font-bold text-slate-500 dark:text-slate-400">내용별 합계 · 금액이 높은 순</div>
+                      ${descriptionRows.map((desc, dIdx) => {
+                        const descriptionId = `${categoryId}_desc_${dIdx}`;
+                        const descriptionExpanded = Boolean(window.statsExpenseDescriptionExpanded[descriptionId]);
+                        const txRows = [...desc.txs].sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')));
+                        return `
+                          <div class="rounded-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
+                            <button type="button" onclick="toggleStatsExpenseDescription('${descriptionId}')" class="w-full flex items-center justify-between gap-3 px-2.5 py-2 text-left">
+                              <span class="min-w-0 flex items-center gap-2 text-xs font-semibold">
+                                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 ${descriptionExpanded ? 'rotate-90' : ''}"></i>
+                                <span class="truncate">${escapeHtml(desc.name)}</span>
+                              </span>
+                              <span class="shrink-0 text-xs font-bold text-rose-600 dark:text-rose-300 tabular-nums">${won(desc.total)}</span>
+                            </button>
+                            ${descriptionExpanded ? `
+                              <div class="px-2.5 pb-2 border-t border-slate-100 dark:border-slate-700">
+                                <div class="text-[11px] text-slate-400 py-1.5">날짜별 실제 지출 내역</div>
+                                ${txRows.map(tx => `
+                                  <div class="flex justify-between items-center gap-3 py-1.5 text-xs border-b border-slate-100 dark:border-slate-700 last:border-0">
+                                    <span class="min-w-0 text-slate-600 dark:text-slate-300">${escapeHtml(String(tx.date || '날짜 미지정'))}${tx.person ? ` · ${escapeHtml(String(tx.person))}` : ''}</span>
+                                    <span class="shrink-0 font-semibold tabular-nums text-slate-800 dark:text-slate-100">${won(tx.amount)}</span>
+                                  </div>
+                                `).join('')}
+                              </div>` : ''}
+                          </div>`;
+                      }).join('')}
+                    </div>` : '';
+                } else {
+                  const detailId = `stats_${type}_detail_${sIdx}`;
+                  detailHtml = `
+                    <div id="${detailId}" class="hidden bg-white dark:bg-slate-800/80 p-3 border-t border-slate-200/50 dark:border-slate-700 space-y-2">
+                      ${[...subObj.txs].sort((a,b) => String(b.date || '').localeCompare(String(a.date || ''))).map(tx => `
+                        <div class="flex justify-between items-center gap-3 py-1.5 text-xs border-b border-slate-100 dark:border-slate-700 last:border-0">
+                          <span class="min-w-0">${escapeHtml(String(tx.date || '날짜 미지정'))} · ${escapeHtml(String(tx.person || ''))}${tx.desc ? ` · ${escapeHtml(String(tx.desc))}` : ''}</span>
+                          <span class="shrink-0 font-semibold tabular-nums">${won(tx.amount)}</span>
+                        </div>`).join('')}
+                    </div>`;
+                }
 
                 return `
                   <div class="bg-slate-50 dark:bg-slate-700/40 rounded-xl overflow-hidden border border-slate-200/50 dark:border-slate-600/50">
-                    <div onclick="toggleAccordion('${subAccordionId}')" class="p-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors">
-                      <div class="flex justify-between items-center font-semibold text-sm mb-1">
-                        <span class="flex items-center gap-1.5">
-                          <i class="fa-solid fa-chevron-right text-xs text-slate-400 transition-transform" id="${subAccordionId}_icon"></i>
-                          ${sub}
-                          <span class="text-xs text-slate-400 font-normal">(${type}의 ${subPctOfTotal}%)</span>
-                        </span>
-                        <span>${subObj.total.toLocaleString()}원</span>
+                    ${isExpense ? `
+                      <button type="button" onclick="toggleStatsExpenseCategory('${categoryId}')" class="w-full text-left p-3 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors">
+                        <div class="flex justify-between items-center font-semibold text-sm mb-1 gap-2">
+                          <span class="flex items-center gap-1.5 min-w-0">
+                            <i class="fa-solid fa-chevron-right text-xs text-slate-400 transition-transform ${categoryExpanded ? 'rotate-90' : ''}"></i>
+                            <span class="truncate">${escapeHtml(sub)}</span>
+                            <span class="text-xs text-slate-400 font-normal whitespace-nowrap">(${subPct}%)</span>
+                          </span>
+                          <span class="shrink-0 tabular-nums">${won(subObj.total)}</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-600 h-1.5 rounded-full overflow-hidden">
+                          <div class="${typeBgClass} h-full" style="width:${subPct}%"></div>
+                        </div>
+                        <div class="text-[10px] text-indigo-600 dark:text-indigo-300 mt-1">${categoryExpanded ? '내용별 합계 접기' : `내용별 합계 보기 (${descriptionRows.length}개)`}</div>
+                      </button>
+                    ` : `
+                      <div onclick="toggleAccordion('stats_${type}_detail_${sIdx}')" class="p-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors">
+                        <div class="flex justify-between items-center font-semibold text-sm mb-1">
+                          <span>${escapeHtml(sub)} <span class="text-xs text-slate-400 font-normal">(${subPct}%)</span></span>
+                          <span>${won(subObj.total)}</span>
+                        </div>
                       </div>
-                      <div class="w-full bg-slate-200 dark:bg-slate-600 h-1.5 rounded-full overflow-hidden">
-                        <div class="${typeBgClass} h-full" style="width: ${subPctOfTotal}%"></div>
-                      </div>
-                    </div>
-
-                    <div id="${subAccordionId}" class="hidden bg-white dark:bg-slate-800/80 p-3 border-t border-slate-200/50 dark:border-slate-700 space-y-3 text-xs">
-                      
-                      <div class="space-y-2">
-                        <div class="font-semibold text-slate-500 mb-1">📋 내용별 목록</div>
-                        ${[...subObj.txs].sort((a, b) => new Date(a.date) - new Date(b.date)).map(tx => `
-                          <div class="flex justify-between items-center gap-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700 last:border-0">
-                            <span class="min-w-0">${tx.date} · <strong class="text-slate-700 dark:text-slate-300">${tx.person}</strong>${tx.desc ? ` · ${tx.desc}` : ''}</span>
-                            <span class="shrink-0 font-semibold">${tx.amount.toLocaleString()}원</span>
-                          </div>
-                        `).join('')}
-                      </div>
-
-                    </div>
-                  </div>
-                `;
+                    `}
+                    ${detailHtml}
+                  </div>`;
               }).join('')}
             </div>
-          </div>
-        `;
+          </div>`;
       });
 
       container.innerHTML = html || `<p class="text-center text-slate-400 py-4 text-sm">통계 데이터가 없습니다.</p>`;
