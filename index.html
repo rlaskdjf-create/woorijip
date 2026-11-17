@@ -984,7 +984,6 @@
 
       const selectedType = window.listSummarySelectedType || '합계';
       const total = selectedType === '합계' ? totals['지출'] + totals['저축'] : totals[selectedType];
-      const won = n => `${Math.round(n).toLocaleString('ko-KR')}원`;
       const color = selectedType === '지출'
         ? 'text-rose-600 dark:text-rose-300'
         : selectedType === '저축'
@@ -1036,7 +1035,6 @@
         host.innerHTML = `<div class="space-y-2"><div class="font-bold text-sm">지출 분석</div><p class="text-center text-xs text-slate-400 py-3">선택한 기간에 지출 내역이 없습니다.</p></div>`;
         return;
       }
-      const won = n => `${Math.round(n).toLocaleString('ko-KR')}원`;
       host.innerHTML = `${hostId === 'dashboardExpenseAnalysis' ? '<div class="font-bold text-sm">지출 세부 분석</div><p class="text-xs text-slate-500 dark:text-slate-400">세부항목별 합계와 각 항목 안의 지출 내용을 큰 금액순으로 보여줍니다. 항목을 누르면 내용별 목록을 펼칠 수 있습니다.</p>' : ''}<div class="flex items-end justify-between gap-2"><div><div class="font-bold text-sm">지출 분석</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1">세부항목별 지출과 각 항목의 실제 지출 내용을 큰 금액순으로 확인합니다.</div></div><div class="text-right shrink-0"><div class="text-[11px] text-slate-500 dark:text-slate-400">총 지출</div><div class="text-lg font-extrabold text-rose-600 dark:text-rose-300 tabular-nums">${won(totalExpense)}</div></div></div><div class="space-y-2">${categories.map((group,index) => {
         const descriptions = [...group.descriptions.entries()].map(([name,amount]) => ({name,amount})).sort((a,b) => b.amount-a.amount || a.name.localeCompare(b.name,'ko'));
         const expanded = Boolean(window.expenseAnalysisExpanded[group.name]);
@@ -1704,19 +1702,19 @@
         if (!daily[day]) daily[day] = { 수입: 0, 지출: 0, 저축: 0 };
         if (['수입', '지출', '저축'].includes(t.type)) daily[day][t.type] += Number(t.amount) || 0;
       });
-      const won = n => `${Math.round(n).toLocaleString('ko-KR')}원`;
       const cells = [];
       for (let i = 0; i < firstWeekday; i++) cells.push('<div></div>');
       for (let day = 1; day <= daysInMonth; day++) {
         const v = daily[day] || { 수입: 0, 지출: 0, 저축: 0 };
         const has = v.수입 || v.지출 || v.저축;
-        cells.push(`<div class="min-h-[94px] rounded-lg border ${has ? 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/40' : 'border-transparent'} p-1.5">
-          <div class="text-xs font-bold mb-1">${day}</div>
-          ${has ? `<div class="space-y-0.5 text-[10px] leading-tight tabular-nums">
-            <div class="text-emerald-600 dark:text-emerald-400 truncate">수 ${won(v.수입)}</div>
-            <div class="text-rose-600 dark:text-rose-400 truncate">지 ${won(v.지출)}</div>
-            <div class="text-indigo-600 dark:text-indigo-400 truncate">저 ${won(v.저축)}</div>
-          </div>` : '<div class="text-[10px] text-slate-300 dark:text-slate-600">-</div>'}
+        const markers = [
+          v.수입 ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>' : '',
+          v.지출 ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-rose-500"></span>' : '',
+          v.저축 ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500"></span>' : ''
+        ].filter(Boolean).join('');
+        cells.push(`<div class="min-h-[48px] rounded-lg border ${has ? 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/40' : 'border-transparent'} flex flex-col items-center justify-center gap-1 py-1">
+          <div class="text-xs font-bold">${day}</div>
+          <div class="flex items-center justify-center gap-1 h-1.5">${markers}</div>
         </div>`);
       }
       panel.innerHTML = `<div class="flex items-center justify-between gap-2"><div class="font-bold">${year}년 ${month}월 일별 내역</div><button type="button" onclick="toggleTransactionCalendar()" class="text-slate-400 p-1" aria-label="달력 닫기"><i class="fa-solid fa-xmark"></i></button></div>
