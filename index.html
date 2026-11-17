@@ -848,7 +848,7 @@
         if(error) throw error;
         // 회원가입 직후 발급된 세션을 종료해 자동 로그인되지 않도록 처리
         if(data.session){
-          const {error:signOutError}=await window.sbClient.auth.signOut();
+          const {error:signOutError}=await window.sbClient.auth.signOut({ scope: 'local' });
           if(signOutError) throw signOutError;
         }
         currentAccount=null;
@@ -864,9 +864,8 @@
       const id=document.getElementById('loginId').value.trim(), pw=document.getElementById('loginPw').value;
       try {
         const keepLoggedIn = document.getElementById('autoLogin').checked;
-        // 체크 상태에 맞는 브라우저 기본 저장소로 인증 클라이언트를 새로 만듭니다.
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        sessionStorage.removeItem(AUTH_STORAGE_KEY);
+        // 자동 로그인 설정은 이 기기의 저장소에만 적용합니다. 다른 기기의 세션은 건드리지 않습니다.
+        // 로그인 시 기존 토큰을 무조건 삭제하지 않아 같은 기기의 다른 탭 세션도 불필요하게 끊지 않습니다.
         if (keepLoggedIn) localStorage.setItem(AUTO_LOGIN_FLAG, '1');
         else localStorage.removeItem(AUTO_LOGIN_FLAG);
         window.sbClient = createAuthClient(keepLoggedIn);
@@ -889,7 +888,7 @@
       if(error){console.error(error);alert(`저장에 실패했습니다: ${error.message}`);}
     }
     async function handleLogout() {
-      await window.sbClient.auth.signOut(); currentAccount=null;
+      await window.sbClient.auth.signOut({ scope: 'local' }); currentAccount=null;
       localStorage.removeItem(AUTH_STORAGE_KEY); sessionStorage.removeItem(AUTH_STORAGE_KEY);
       localStorage.removeItem(AUTO_LOGIN_FLAG);
       document.getElementById('autoLogin').checked = false;
@@ -1449,25 +1448,31 @@
         const [y, m] = key.split('-').map(Number);
         const day = Math.min(Number(f.day) || 1, new Date(y, m, 0).getDate());
         const date = `${key}-${String(day).padStart(2,'0')}`;
-        // 이번 달 고정비는 결제일 당일 00:00부터 거래내역으로 생성합니다.
-        // 과거 달은 기존처럼 모두 생성해 월별 기록을 보존합니다.
-        const todayKey = localDateKey(new Date());
-        if (date > todayKey) return;
+        // 고정비 수정 시 이미 생성된 거래내역도 구성원/금액/결제일/항목/내용을 즉시 동기화합니다.
         const id = `fixed-${f.id}-${key}`;
         const amount = Number((f.overrides || {})[key] ?? f.amount);
         const existing = state.transactions.find(t => String(t.id) === id);
         if (existing) {
-          if (refreshExisting && Number(existing.amount) !== amount) {
-            existing.amount = amount;
-            existing.person = f.person;
-            existing.subcategory = f.subcategory || '고정비';
-            existing.desc = f.desc || f.name;
-            existing.type = f.type || '지출';
-            existing.date = date;
-            changed = true;
+          if (refreshExisting) {
+            const next = {
+              person: f.person,
+              type: f.type || '지출',
+              subcategory: f.subcategory || '고정비',
+              date,
+              amount,
+              desc: f.desc || f.name,
+              fixedExpenseId: f.id,
+              generatedMonth: key
+            };
+            Object.keys(next).forEach(field => {
+              if (existing[field] !== next[field]) { existing[field] = next[field]; changed = true; }
+            });
           }
           return;
         }
+        // 이번 달 신규 고정비는 결제일 당일 00:00부터 생성합니다. 과거 달은 월별 기록을 보존합니다.
+        const todayKey = localDateKey(new Date());
+        if (key === currentMonthKey() && date > todayKey) return;
         state.transactions.unshift({ id, person: f.person, type: f.type || '지출', subcategory: f.subcategory || '고정비', date, amount, desc: f.desc || f.name, fixedExpenseId: f.id, generatedMonth: key });
         changed = true;
       });
