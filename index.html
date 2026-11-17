@@ -973,6 +973,7 @@
     }
 
     function renderListTotalSummary(transactions) {
+      const won = n => `${Math.round(Number(n) || 0).toLocaleString('ko-KR')}원`;
       const selected = state.selectedMonth || currentMonthKey();
       const [year, month] = selected.split('-').map(Number);
       const totals = { '지출': 0, '저축': 0 };
@@ -1015,6 +1016,7 @@
     }
 
     function renderListExpenseAnalysis(transactions, hostId = 'listExpenseAnalysis') {
+      const won = n => `${Math.round(Number(n) || 0).toLocaleString('ko-KR')}원`;
       const host = document.getElementById(hostId);
       if (!host) return;
       const expenses = transactions.filter(t => t.type === '지출');
@@ -1707,14 +1709,14 @@
       for (let day = 1; day <= daysInMonth; day++) {
         const v = daily[day] || { 수입: 0, 지출: 0, 저축: 0 };
         const has = v.수입 || v.지출 || v.저축;
-        const markers = [
-          v.수입 ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>' : '',
-          v.지출 ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-rose-500"></span>' : '',
-          v.저축 ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500"></span>' : ''
-        ].filter(Boolean).join('');
-        cells.push(`<div class="min-h-[48px] rounded-lg border ${has ? 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/40' : 'border-transparent'} flex flex-col items-center justify-center gap-1 py-1">
-          <div class="text-xs font-bold">${day}</div>
-          <div class="flex items-center justify-center gap-1 h-1.5">${markers}</div>
+        const amounts = [
+          v.수입 ? `<div class="text-[10px] leading-tight font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">${Math.round(v.수입).toLocaleString('ko-KR')}</div>` : '',
+          v.지출 ? `<div class="text-[10px] leading-tight font-semibold text-rose-600 dark:text-rose-400 tabular-nums">${Math.round(v.지출).toLocaleString('ko-KR')}</div>` : '',
+          v.저축 ? `<div class="text-[10px] leading-tight font-semibold text-indigo-600 dark:text-indigo-400 tabular-nums">${Math.round(v.저축).toLocaleString('ko-KR')}</div>` : ''
+        ].join('');
+        cells.push(`<div class="min-h-[66px] rounded-lg border ${has ? 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/40' : 'border-transparent'} flex flex-col items-center justify-start gap-1 py-1 px-0.5">
+          <div class="text-xs font-bold">${day}일</div>
+          <div class="flex flex-col items-center gap-0.5 w-full">${amounts}</div>
         </div>`);
       }
       panel.innerHTML = `<div class="flex items-center justify-between gap-2"><div class="font-bold">${year}년 ${month}월 일별 내역</div><button type="button" onclick="toggleTransactionCalendar()" class="text-slate-400 p-1" aria-label="달력 닫기"><i class="fa-solid fa-xmark"></i></button></div>
